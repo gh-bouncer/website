@@ -4,9 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>gh bouncer</title>
-<meta name="description" content="Pull requests from outside your team wait at the door until their author runs a thorough AI review in their own fork, on their own API key. Not a service: a GitHub Action and a gh extension.">
+<meta name="description" content="Outside pull requests get reviewed by the contributor's own AI, in their own GitHub Actions, before they reach you. No account, no server, two public repos.">
 <meta property="og:title" content="gh bouncer">
-<meta property="og:description" content="PRs pay their own cover. Outside pull requests get a thorough AI review on their author's own API key before you see them.">
+<meta property="og:description" content="PRs pay their own cover. Outside pull requests are reviewed by the contributor's own AI, in their own GitHub Actions, before they reach you.">
 <meta property="og:url" content="https://gh-bouncer.com">
 <meta name="theme-color" content="#0d1117">
 <link rel="canonical" href="https://gh-bouncer.com/">
@@ -28,10 +28,19 @@
   --code-bg: #151933;
   --code-ink: #e6e8f2;
   --code-dim: #8d93ad;
+  --content: 1072px;
   --measure: 66ch;
+  /* GitHub-style mock UI */
+  --gh-fg: #1f2328;
+  --gh-muted: #59636e;
+  --gh-border: #d1d9e0;
+  --gh-subtle: #f6f8fa;
+  --gh-link: #0969da;
+  --gh-green: #1a7f37;
+  --gh-red: #cf222e;
+  --gh-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif;
 }
-/* the dark masthead: nav, headline and the door */
-.masthead {
+.dark {
   color-scheme: dark;
   --paper: #0d1117;
   --paper-2: #1f2630;
@@ -42,11 +51,10 @@
   --pass: #79a1ff;
   --bounce: #ff5f6d;
   --open: #3fb950;
+  --code-bg: #161b22;
   background: var(--paper);
   color: var(--ink);
-  padding-bottom: 40px;
 }
-.masthead .stamp { mix-blend-mode: normal; }
 * { box-sizing: border-box; }
 html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
 @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
@@ -62,19 +70,17 @@ a { color: inherit; text-decoration-thickness: 1px; text-underline-offset: 0.18e
 a:hover { color: var(--pass); }
 :focus-visible { outline: 3px solid var(--pass); outline-offset: 3px; border-radius: 2px; }
 code, pre { font-family: "JetBrains Mono", ui-monospace, monospace; }
-p code, h3 code { font-size: 0.86em; background: var(--paper-2); padding: 0.1em 0.35em; border-radius: 4px; }
+p code, h3 code, li code { font-size: 0.86em; background: var(--paper-2); padding: 0.1em 0.35em; border-radius: 4px; }
 
-.wrap { max-width: 1120px; margin: 0 auto; padding: 0 24px; }
+.wrap { max-width: calc(var(--content) + 48px); margin: 0 auto; padding: 0 24px; }
 @media (max-width: 480px) { .wrap { padding: 0 16px; } }
 
-/* --- top bar --- */
+/* --- masthead --- */
 .top { display: flex; justify-content: space-between; align-items: center; padding: 22px 0; }
 .brand { font-weight: 800; font-variation-settings: "wdth" 115; font-size: 1.05rem; text-decoration: none; letter-spacing: -0.01em; }
 .top nav a { margin-left: 22px; font-size: 0.95rem; color: var(--muted); text-decoration: none; }
 .top nav a:hover { color: var(--ink); }
-
-/* --- hero --- */
-.hero { padding: 36px 0 0; text-align: center; }
+.hero { text-align: center; padding: 72px 0 104px; }
 h1 {
   margin: 0;
   font-size: clamp(2.6rem, 8.6vw, 6.6rem);
@@ -82,51 +88,137 @@ h1 {
   font-weight: 900;
   font-variation-settings: "wdth" 70;
   letter-spacing: -0.015em;
+  text-wrap: balance;
 }
-.not-saas { margin: 18px auto 0; font-size: 1.25rem; color: var(--muted); max-width: 34em; }
-.not-saas strong { color: var(--ink); font-weight: 650; }
-
-/* --- the scene --- */
-.scene { margin: 24px 0 0; }
-.stage-box { position: relative; width: 100%; aspect-ratio: 1000 / 420; }
-.stage { position: absolute; left: 0; top: 0; width: 1000px; height: 420px; transform-origin: 0 0; }
-.stage svg.scenery { position: absolute; inset: 0; width: 1000px; height: 420px; overflow: visible; }
-.cards { position: absolute; inset: 0; }
-.tally { margin: 6px 0 0; font-size: 0.98rem; color: var(--muted); font-variant-numeric: tabular-nums; }
-.tally strong { color: var(--ink); font-weight: 750; }
-.tally .in { color: var(--pass); }
-
-.chip {
-  text-align: left;
-  position: absolute;
-  left: 0; top: 0;
-  width: 146px;
-  height: 42px;
-  padding: 5px 9px 5px 28px;
-  background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  box-shadow: 0 2px 0 rgba(0, 0, 0, 0.4);
-  font-size: 12px;
-  line-height: 1.22;
-  font-weight: 600;
-  color: var(--ink);
-  will-change: transform;
+.sub { margin: 22px auto 0; font-size: 1.3rem; line-height: 1.5; color: var(--muted); max-width: 31em; text-wrap: balance; }
+.sub strong { color: var(--ink); font-weight: 650; }
+.facts { list-style: none; display: flex; flex-wrap: wrap; justify-content: center; gap: 10px 12px; margin: 30px 0 0; padding: 0; }
+.facts li { border: 1px solid var(--line); border-radius: 99px; padding: 6px 14px; font-size: 0.95rem; color: var(--ink); }
+.facts a { color: inherit; }
+.install-pill {
+  display: inline-flex; align-items: center; gap: 10px;
+  margin: 34px 0 0; padding: 12px 12px 12px 18px;
+  background: var(--surface); border: 1px solid var(--line); border-radius: 12px;
+  font-family: "JetBrains Mono", ui-monospace, monospace; font-size: 0.95rem;
+  max-width: 100%;
 }
-.chip::before {
-  content: "";
-  position: absolute;
-  left: 9px; top: 8px;
-  width: 12px; height: 12px;
-  border-radius: 50%;
-  border: 2.5px solid var(--open);
-}
-.chip .n { display: block; font-weight: 400; color: var(--muted); font-size: 11px; }
-.chip .tt { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.chip .stamp { position: absolute; right: -8px; top: 6px; font-size: 13px; padding: 2px 6px 1px; border-width: 2.5px; }
-.chip.out { opacity: 0.7; }
+.install-pill code { overflow-x: auto; white-space: nowrap; }
+.install-pill .p { color: var(--muted); user-select: none; }
+.copybtn { font-family: "Archivo", sans-serif; font-size: 0.85rem; font-weight: 650; color: var(--ink); background: var(--paper-2); border: 1px solid var(--line); border-radius: 8px; padding: 5px 11px; cursor: pointer; flex: none; }
+.copybtn:hover { border-color: var(--muted); }
+.hero .then { margin: 12px 0 0; font-size: 0.95rem; color: var(--muted); }
 
-/* --- stamps --- */
+/* --- story --- */
+.story { padding: 112px 0 40px; }
+.story > .wrap > h2 { text-align: center; }
+h2 {
+  margin: 0 0 28px;
+  font-size: clamp(1.9rem, 4vw, 3rem);
+  line-height: 1.05;
+  font-weight: 850;
+  font-variation-settings: "wdth" 80;
+  letter-spacing: -0.01em;
+}
+.step { display: grid; grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr); gap: 56px; align-items: center; padding: 72px 0; }
+.step-text .n { display: block; font-weight: 900; font-variation-settings: "wdth" 62; font-size: 3.2rem; line-height: 1; margin-bottom: 14px; color: var(--muted); }
+.step-text h3 { margin: 0 0 10px; font-size: 1.6rem; line-height: 1.15; font-weight: 800; font-variation-settings: "wdth" 90; }
+.step-text p { margin: 0; color: var(--muted); font-size: 1.1rem; max-width: 26em; }
+.step-text code { font-size: 0.86em; background: var(--paper-2); padding: 0.1em 0.35em; border-radius: 4px; }
+
+/* reveal */
+@media (prefers-reduced-motion: no-preference) {
+  .js .reveal { opacity: 0; translate: 0 36px; transition: opacity 0.6s ease, translate 0.6s cubic-bezier(.2,.8,.2,1); }
+  .js .reveal.in { opacity: 1; translate: 0 0; }
+  .js .slide-in { opacity: 0; translate: 48px 0; transition: opacity 0.5s ease 0.35s, translate 0.6s cubic-bezier(.2,.8,.2,1) 0.35s; }
+  .js .in .slide-in { opacity: 1; translate: 0 0; }
+}
+
+/* GitHub-style mock chrome */
+.mock { font-family: var(--gh-sans); color: var(--gh-fg); font-size: 14px; line-height: 1.5; background: #fff; border: 1px solid var(--gh-border); border-radius: 12px; box-shadow: 0 30px 60px -30px rgba(21, 25, 51, 0.35); overflow: hidden; }
+.mock .bar, .term .bar { display: flex; align-items: center; gap: 8px; padding: 10px 14px; background: var(--gh-subtle); border-bottom: 1px solid var(--gh-border); font-size: 12px; color: var(--gh-muted); }
+.mock .bar i, .term .bar i { width: 10px; height: 10px; border-radius: 50%; background: #d1d9e0; display: inline-block; }
+.mock .bar span, .term .bar span { margin-left: 8px; font-family: "JetBrains Mono", monospace; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mock .body { padding: 18px 20px 20px; }
+.mock a, .mock .lnk { color: var(--gh-link); text-decoration: none; }
+.mock code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px; background: rgba(129,139,152,.15); padding: 1px 5px; border-radius: 6px; }
+.pr-title { margin: 0; font-size: 22px; font-weight: 400; line-height: 1.3; }
+.pr-title .num { color: var(--gh-muted); }
+.pr-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 8px 0 16px; padding-bottom: 14px; border-bottom: 1px solid var(--gh-border); color: var(--gh-muted); font-size: 13px; }
+.state { display: inline-flex; align-items: center; gap: 4px; color: #fff; font-weight: 600; font-size: 13px; padding: 4px 11px; border-radius: 99px; }
+.state.open { background: var(--gh-green); }
+.state.draft { background: #59636e; }
+.state.closed { background: var(--gh-red); }
+.ghl { display: inline-block; font-size: 12px; font-weight: 600; padding: 0 8px; border-radius: 99px; line-height: 20px; border: 1px solid transparent; }
+.ghl.pending { background: #fff8c5; color: #7d4e00; border-color: #eac54f; }
+.ghl.passl { background: #dafbe1; color: #1a7f37; border-color: #8ddb8c; }
+.ghl.faill { background: #ffebe9; color: #cf222e; border-color: #ff8182; }
+.tl { position: relative; display: grid; gap: 14px; }
+.tl::before { content: ""; position: absolute; left: 19px; top: 0; bottom: 0; width: 2px; background: var(--gh-border); }
+.cmt { position: relative; display: grid; grid-template-columns: 40px minmax(0, 1fr); gap: 12px; }
+.av { width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; font-weight: 700; color: #fff; font-size: 14px; position: relative; z-index: 1; }
+.av.u { background: #8250df; }
+.av.bot { background: #24292f; border-radius: 10px; font-size: 18px; }
+.box { border: 1px solid var(--gh-border); border-radius: 6px; background: #fff; min-width: 0; }
+.box .hd { padding: 8px 14px; background: var(--gh-subtle); border-bottom: 1px solid var(--gh-border); border-radius: 6px 6px 0 0; font-size: 13px; color: var(--gh-muted); }
+.box .hd b { color: var(--gh-fg); }
+.box .bd { padding: 12px 14px; }
+.box .bd p { margin: 0 0 10px; }
+.box .bd p:last-child { margin-bottom: 0; }
+.box h4 { margin: 0 0 8px; font-size: 16px; }
+.box pre { margin: 8px 0 10px; background: var(--gh-subtle); border-radius: 6px; padding: 10px 12px; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px; line-height: 1.6; overflow-x: auto; }
+.badge { font-size: 11px; border: 1px solid var(--gh-border); border-radius: 99px; padding: 0 6px; margin-left: 4px; color: var(--gh-muted); font-weight: 500; }
+.event { position: relative; display: grid; grid-template-columns: 40px minmax(0,1fr); gap: 12px; font-size: 13px; color: var(--gh-muted); align-items: center; }
+.event .dot { width: 26px; height: 26px; margin-left: 7px; border-radius: 50%; background: var(--gh-subtle); border: 1px solid var(--gh-border); display: grid; place-items: center; font-size: 12px; position: relative; z-index: 1; }
+.event b { color: var(--gh-fg); }
+
+/* terminal */
+.term { background: #0d1117; color: #e6edf3; border: 1px solid #30363d; border-radius: 12px; overflow: hidden; box-shadow: 0 30px 60px -30px rgba(21, 25, 51, 0.5); }
+.term .bar { background: #161b22; border-color: #30363d; color: #9198a1; }
+.term .bar i { background: #30363d; }
+.term pre { margin: 0; padding: 18px 20px 22px; font-size: 13px; line-height: 1.75; min-height: 300px; white-space: pre-wrap; word-break: break-all; }
+.term .pr { color: #3fb950; }
+.term .dim { color: #9198a1; }
+.term .ok { color: #3fb950; }
+.term .cursor { display: inline-block; width: 8px; height: 1.1em; background: #e6edf3; vertical-align: -0.2em; animation: blinkc 1s steps(2, jump-none) infinite; }
+@keyframes blinkc { 0% { opacity: 1; } 100% { opacity: 0; } }
+
+/* actions run */
+.run { display: grid; grid-template-columns: 170px minmax(0, 1fr); }
+.run aside { border-right: 1px solid var(--gh-border); padding: 14px 10px; font-size: 13px; }
+.run aside .it { padding: 6px 10px; border-radius: 6px; color: var(--gh-muted); }
+.run aside .it.on { background: var(--gh-subtle); color: var(--gh-fg); font-weight: 600; }
+.run aside .lab { font-size: 12px; color: var(--gh-muted); padding: 10px 10px 4px; }
+.run main { padding: 16px 18px 18px; min-width: 0; }
+.run h4 { margin: 0; font-size: 18px; font-weight: 600; }
+.run .rmeta { color: var(--gh-muted); font-size: 12px; margin: 2px 0 14px; }
+.steps-list { list-style: none; margin: 0; padding: 0; border: 1px solid var(--gh-border); border-radius: 6px; background: #010409; color: #e6edf3; font-family: var(--gh-sans); font-size: 13px; }
+.steps-list li { display: grid; grid-template-columns: 22px minmax(0,1fr) auto; gap: 8px; align-items: center; padding: 7px 12px; border-top: 1px solid #21262d; }
+.steps-list li:first-child { border-top: 0; }
+.steps-list .ico { width: 16px; height: 16px; border-radius: 50%; border: 2px solid #484f58; }
+.steps-list li.run-now .ico { border-color: #d29922; border-top-color: transparent; animation: spin2 0.8s linear infinite; }
+.steps-list li.done .ico { border: 0; background: #238636; display: grid; place-items: center; }
+.steps-list li.done .ico::after { content: ""; width: 7px; height: 4px; border-left: 2px solid #fff; border-bottom: 2px solid #fff; rotate: -45deg; translate: 0 -1px; }
+.steps-list .t { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.steps-list .d { color: #9198a1; font-size: 12px; font-variant-numeric: tabular-nums; }
+.steps-list li:not(.done) .d { visibility: hidden; }
+.statusrow { display: flex; align-items: center; gap: 8px; margin-top: 12px; font-size: 13px; color: var(--gh-muted); }
+.statusrow .s { font-weight: 600; color: #9a6700; }
+.statusrow .s.ok { color: var(--gh-green); }
+@keyframes spin2 { to { rotate: 360deg; } }
+
+/* outcome tabs */
+.tabs { display: inline-flex; gap: 4px; padding: 4px; background: var(--paper-2); border-radius: 10px; margin-bottom: 16px; }
+.tabs button { font: inherit; font-weight: 700; font-size: 0.95rem; border: 0; background: transparent; color: var(--muted); padding: 7px 16px; border-radius: 7px; cursor: pointer; }
+.tabs button[aria-selected=true] { background: var(--surface); color: var(--ink); box-shadow: 0 1px 2px rgba(0,0,0,.12); }
+.tabs button .e { margin-right: 4px; }
+[role=tabpanel][hidden] { display: none; }
+.rulelist { list-style: none; margin: 4px 0 0; padding: 0; font-size: 13px; display: grid; gap: 4px; }
+.rulelist code { margin-right: 4px; }
+.mock .muted { color: var(--gh-muted); font-size: 12px; }
+.mock ul.why { margin: 4px 0 10px; padding-left: 18px; }
+.mock ul.why li { margin: 2px 0; }
+
+/* stamps */
 .stamp {
   display: inline-block;
   padding: 4px 10px 3px;
@@ -136,160 +228,50 @@ h1 {
   font-variation-settings: "wdth" 125;
   letter-spacing: 0.06em;
   line-height: 1.2;
-  mix-blend-mode: multiply;
   --grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='40'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' seed='3'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 -2.2 1.9'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
   -webkit-mask-image: var(--grain);
   mask-image: var(--grain);
   -webkit-mask-size: 120px 40px;
   mask-size: 120px 40px;
   rotate: -9deg;
+  font-family: "Archivo", sans-serif;
 }
 .stamp.pass { color: var(--pass); rotate: 6deg; }
 .stamp.bounce { color: var(--bounce); }
+.mock .stamp { position: absolute; right: 18px; top: 14px; font-size: 1.15rem; }
+.mock .stamp.pass { color: #2f45d9; }
+.mock .stamp.bounce { color: #c4122f; }
+.outcome .mock { position: relative; }
 
-/* scenery motion */
-@media (prefers-reduced-motion: no-preference) {
-  .gear { animation: spin 3s linear infinite; transform-box: fill-box; transform-origin: center; }
-  .gear.rev { animation-direction: reverse; animation-duration: 2.2s; }
-  .belt-dash { animation: belt 0.6s linear infinite; }
-  .lamp { animation: blink 1.1s steps(2, jump-none) infinite; }
-  .lamp:nth-of-type(2) { animation-delay: 0.3s; }
-  .lamp:nth-of-type(3) { animation-delay: 0.7s; }
-  .puff { animation: puff 2.4s ease-out infinite; transform-box: fill-box; transform-origin: center; }
-  .puff.p2 { animation-delay: 0.8s; }
-  .puff.p3 { animation-delay: 1.6s; }
-  .machine { animation: shake 0.24s ease-in-out infinite alternate; transform-box: fill-box; transform-origin: 50% 100%; }
-}
-@keyframes spin { to { rotate: 360deg; } }
-@keyframes belt { to { stroke-dashoffset: -24; } }
-@keyframes blink { 0% { opacity: 1; } 100% { opacity: 0.25; } }
-@keyframes puff { 0% { opacity: 0.7; translate: 0 0; scale: 0.6; } 100% { opacity: 0; translate: 14px -60px; scale: 1.8; } }
-@keyframes shake { from { rotate: -0.4deg; } to { rotate: 0.4deg; } }
-
-/* --- install --- */
-.install { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: start; padding: 64px 0 96px; }
-.install > * { min-width: 0; }
-.install h2 { font-size: 1.35rem; font-variation-settings: "wdth" 100; margin: 0 0 6px; }
-.install p { margin: 0 0 14px; color: var(--muted); }
-.install p.after { margin: 12px 0 0; font-size: 0.95rem; }
-.install p.after a { color: var(--ink); }
-.cmd {
-  margin: 0;
-  max-width: 100%;
-  background: var(--code-bg);
-  border: 1px solid var(--line);
-  color: var(--code-ink);
-  border-radius: 10px;
-  padding: 16px 18px;
-  font-size: 0.9rem;
-  line-height: 1.75;
-  overflow-x: auto;
-}
-.cmd .p { color: var(--code-dim); user-select: none; }
-
-/* --- sections --- */
-section.block { padding: 88px 0; border-top: 1px solid var(--line); }
-h2 {
-  margin: 0 0 28px;
-  font-size: clamp(1.8rem, 3.6vw, 2.6rem);
-  line-height: 1.05;
-  font-weight: 850;
-  font-variation-settings: "wdth" 80;
-  letter-spacing: -0.01em;
-  max-width: 20em;
-}
+/* --- can't be faked --- */
+section.block { padding: 96px 0; border-top: 1px solid var(--line); }
 h3 { margin: 0 0 8px; font-size: 1.15rem; font-weight: 700; line-height: 1.3; }
-.block p { max-width: var(--measure); margin: 0 0 16px; }
-.split { display: grid; grid-template-columns: 1fr 1fr; gap: 56px; align-items: start; }
-.split > * { min-width: 0; }
+.checks { list-style: none; margin: 32px 0 0; padding: 0; display: grid; grid-template-columns: repeat(2, 1fr); gap: 28px 48px; }
+.checks li { padding-left: 18px; border-left: 3px solid var(--bounce); }
+.checks p { margin: 0; color: var(--muted); }
 
-/* the bill */
-.bill-wrap { --ink: #151933; --muted: #565c74; --line: #d6d9e3; --pass: #2f45d9; color: var(--ink); position: relative; justify-self: end; width: 100%; max-width: 460px; }
-.bill {
-  background: #fff;
-  border: 1px solid var(--line);
-  border-radius: 4px;
-  padding: 26px 28px 24px;
-  font-family: "JetBrains Mono", ui-monospace, monospace;
-  font-size: 0.88rem;
-  box-shadow: 0 24px 60px -24px rgba(0, 0, 0, 0.8);
-  rotate: 1deg;
+/* --- config: form on the content edge, file to the window edge --- */
+.config {
+  display: grid;
+  grid-template-columns: minmax(24px, 1fr) minmax(0, 560px) 48px minmax(0, 464px) minmax(24px, 1fr);
+  border-top: 1px solid var(--line);
 }
-.bill h3 { font-family: "Archivo", sans-serif; font-size: 1.05rem; margin: 0 0 2px; }
-.bill .sub { color: var(--muted); margin: 0 0 18px; font-size: 0.8rem; }
-.bill table { width: 100%; border-collapse: collapse; }
-.bill td { padding: 7px 0; border-bottom: 1px dashed var(--line); vertical-align: top; }
-.bill td:last-child { text-align: right; white-space: nowrap; padding-left: 16px; }
-.bill tr.total td { border-bottom: none; border-top: 2px solid var(--ink); padding-top: 12px; font-weight: 600; font-size: 1rem; }
-.bill .paid { display: block; color: var(--muted); font-size: 0.76rem; }
-.bill-wrap > .stamp { position: absolute; right: 120px; bottom: 6px; font-size: 1.5rem; }
-
-.isnt { list-style: none; margin: 8px 0 0; padding: 0; display: grid; gap: 14px; }
-.isnt li { padding-left: 30px; position: relative; }
-.isnt li::before { content: ""; position: absolute; left: 0; top: 0.6em; width: 16px; height: 3px; background: var(--bounce); rotate: -9deg; }
-.isnt strong { font-weight: 700; }
-.isnt span { color: var(--muted); }
-
-/* steps: a real sequence, so numbered */
-.steps { list-style: none; margin: 40px 0 0; padding: 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 40px; counter-reset: s; }
-.steps li { counter-increment: s; }
-.steps li::before {
-  content: counter(s);
-  display: block;
-  font-weight: 900;
-  font-variation-settings: "wdth" 62;
-  font-size: 3.4rem;
-  line-height: 1;
-  margin-bottom: 14px;
-}
-.steps p { color: var(--muted); }
-
-
-.yaml {
-  margin: 0;
-  background: var(--code-bg);
-  border: 1px solid var(--line);
-  color: var(--code-ink);
-  border-radius: 10px;
-  padding: 22px 24px;
-  font-size: 0.85rem;
-  line-height: 1.7;
-  overflow-x: auto;
-}
-.yaml .k { color: #9fb0ff; }
-
-/* config builder */
-.docs-intro { margin: -8px 0 40px; color: var(--muted); max-width: var(--measure); }
-.builder { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 460px); gap: 48px; align-items: start; }
+.config-left { grid-column: 2; padding: 96px 0; min-width: 0; }
+.config-right { grid-column: 4 / 6; background: #0d1117; min-width: 0; }
+.docs-intro { margin: -8px 0 40px; color: var(--muted); }
+#config h2 { scroll-margin-top: 24px; }
 .controls { min-width: 0; }
 .group { border: 0; margin: 0 0 44px; padding: 0; min-width: 0; }
 .group legend { padding: 0; font-size: 1.3rem; font-weight: 800; font-variation-settings: "wdth" 90; margin-bottom: 4px; }
-.group .lead { color: var(--muted); margin: 0 0 14px; max-width: none; }
-.field {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  gap: 4px 20px;
-  align-items: center;
-  padding: 14px 0;
-  border-top: 1px solid var(--line);
-}
+.group .lead { color: var(--muted); margin: 0 0 14px; }
+.field { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 4px 20px; align-items: center; padding: 14px 0; border-top: 1px solid var(--line); }
 .field > label, .field > .label { font-weight: 600; font-size: 0.98rem; }
-.field .hint { grid-column: 1 / -1; margin: 0; font-size: 0.86rem; color: var(--muted); max-width: none; }
+.field .hint { grid-column: 1 / -1; margin: 0; font-size: 0.86rem; color: var(--muted); }
 .field.wide { grid-template-columns: 1fr; }
 .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
-.field input[type=number], .field select {
-  font: inherit;
-  font-size: 0.95rem;
-  color: var(--ink);
-  background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  padding: 7px 10px;
-  width: 9.5rem;
-}
+.field input[type=number], .field select { font: inherit; font-size: 0.95rem; color: var(--ink); background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 7px 10px; width: 9.5rem; }
 .field select { width: auto; min-width: 12rem; }
 .field input:focus-visible, .field select:focus-visible, .field textarea:focus-visible, .tags:focus-within { outline: 3px solid var(--pass); outline-offset: 1px; }
-
 .seg { display: inline-flex; flex-wrap: wrap; border: 1px solid var(--line); border-radius: 9px; overflow: hidden; background: var(--surface); }
 .seg label { position: relative; }
 .seg input { position: absolute; opacity: 0; inset: 0; margin: 0; cursor: pointer; }
@@ -297,59 +279,23 @@ h3 { margin: 0 0 8px; font-size: 1.15rem; font-weight: 700; line-height: 1.3; }
 .seg label:first-child span { border-left: 0; }
 .seg input:checked + span { background: var(--ink); color: #fff; }
 .seg input:focus-visible + span { outline: 3px solid var(--pass); outline-offset: -3px; }
-
-.toggle input[type=checkbox] {
-  appearance: none; -webkit-appearance: none;
-  width: 44px; height: 26px; margin: 0;
-  border-radius: 99px;
-  background: #c4c8d4;
-  position: relative; cursor: pointer;
-  transition: background 0.15s;
-}
-.toggle input[type=checkbox]::after {
-  content: ""; position: absolute; top: 3px; left: 3px;
-  width: 20px; height: 20px; border-radius: 50%; background: #fff;
-  box-shadow: 0 1px 2px rgba(0,0,0,.25);
-  transition: translate 0.15s;
-}
+.toggle input[type=checkbox] { appearance: none; -webkit-appearance: none; width: 44px; height: 26px; margin: 0; border-radius: 99px; background: #c4c8d4; position: relative; cursor: pointer; transition: background 0.15s; }
+.toggle input[type=checkbox]::after { content: ""; position: absolute; top: 3px; left: 3px; width: 20px; height: 20px; border-radius: 50%; background: #fff; box-shadow: 0 1px 2px rgba(0,0,0,.25); transition: translate 0.15s; }
 .toggle input[type=checkbox]:checked { background: var(--pass); }
 .toggle input[type=checkbox]:checked::after { translate: 18px 0; }
 .toggle input[type=checkbox]:focus-visible { outline: 3px solid var(--pass); outline-offset: 2px; }
-
 .range { display: flex; align-items: center; gap: 10px; }
 .range input { width: 9rem; accent-color: var(--pass); }
 .range output { font-variant-numeric: tabular-nums; font-weight: 700; width: 3em; text-align: right; }
-
-.tags {
-  grid-column: 1 / -1;
-  display: flex; flex-wrap: wrap; gap: 6px;
-  padding: 6px; min-height: 42px;
-  background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: 8px;
-}
-.tags .tag-chip {
-  display: inline-flex; align-items: center; gap: 4px;
-  font-family: "JetBrains Mono", ui-monospace, monospace; font-size: 0.84rem;
-  background: var(--paper-2); border-radius: 6px; padding: 3px 4px 3px 9px;
-}
+.tags { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 6px; padding: 6px; min-height: 42px; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; }
+.tags .tag-chip { display: inline-flex; align-items: center; gap: 4px; font-family: "JetBrains Mono", ui-monospace, monospace; font-size: 0.84rem; background: var(--paper-2); border-radius: 6px; padding: 3px 4px 3px 9px; }
 .tags .tag-chip button { border: 0; background: none; font: inherit; color: var(--muted); cursor: pointer; padding: 0 5px; border-radius: 4px; }
 .tags .tag-chip button:hover { color: var(--bounce); }
 .tags input { flex: 1; min-width: 12rem; border: 0; outline: 0; background: transparent; font: inherit; font-size: 0.92rem; color: var(--ink); padding: 3px 4px; }
-
-.field textarea {
-  width: 100%; font: inherit; font-size: 0.95rem; line-height: 1.5;
-  color: var(--ink); background: var(--surface);
-  border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; resize: vertical;
-}
-
+.field textarea { width: 100%; font: inherit; font-size: 0.95rem; line-height: 1.5; color: var(--ink); background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; resize: vertical; }
 .rules { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--line); }
 .rule-row { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: 8px 12px; align-items: start; padding: 14px 0; border-bottom: 1px solid var(--line); }
-.rule-row textarea {
-  width: 100%; font: inherit; font-size: 0.95rem; line-height: 1.45; font-weight: 500;
-  color: var(--ink); background: transparent; border: 1px solid transparent; border-radius: 8px;
-  padding: 6px 8px; margin: -6px 0 0 -8px; resize: none; field-sizing: content; min-height: 2.6em;
-}
+.rule-row textarea { width: 100%; font: inherit; font-size: 0.95rem; line-height: 1.45; font-weight: 500; color: var(--ink); background: transparent; border: 1px solid transparent; border-radius: 8px; padding: 6px 8px; margin: -6px 0 0 -8px; resize: none; field-sizing: content; min-height: 2.6em; }
 .rule-row textarea:hover { border-color: var(--line); }
 .rule-row textarea:focus { background: var(--surface); border-color: var(--line); outline: 3px solid var(--pass); outline-offset: 1px; }
 .rule-row .mini { display: inline-flex; border: 1px solid var(--line); border-radius: 99px; overflow: hidden; background: var(--surface); }
@@ -365,259 +311,279 @@ h3 { margin: 0 0 8px; font-size: 1.15rem; font-weight: 700; line-height: 1.3; }
 .add:hover { border-style: solid; }
 .add:disabled { opacity: 0.5; cursor: not-allowed; }
 
-.output { position: sticky; top: 24px; min-width: 0; }
-.out-head {
-  display: flex; justify-content: space-between; align-items: center; gap: 12px;
-  background: #0d1026; color: var(--code-ink);
-  border-radius: 10px 10px 0 0; padding: 8px 8px 8px 16px;
-  font-family: "JetBrains Mono", ui-monospace, monospace; font-size: 0.85rem;
+.output { position: sticky; top: 0; max-height: 100vh; display: flex; flex-direction: column; color: #e6edf3; }
+.out-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 16px 20px; border-bottom: 1px solid #30363d; font-family: "JetBrains Mono", ui-monospace, monospace; font-size: 0.88rem; }
+.out-actions { display: flex; gap: 6px; flex-wrap: wrap; }
+.out-head button { font-family: "Archivo", sans-serif; font-weight: 650; font-size: 0.85rem; color: #e6edf3; background: transparent; border: 1px solid #30363d; border-radius: 7px; padding: 5px 11px; cursor: pointer; }
+.out-head button:hover { border-color: #9198a1; }
+.out-head button.primary { background: #e6edf3; color: #0d1117; border-color: #e6edf3; }
+#yaml { margin: 0; flex: 1; overflow: auto; padding: 20px 24px 28px; font-size: 0.8rem; line-height: 1.7; color: #e6edf3; white-space: pre; }
+#yaml .k { color: #79c0ff; }
+#yaml .c { color: #7d8590; }
+.out-note { margin: 0; padding: 0 24px 16px; min-height: 1.5em; font-size: 0.88rem; color: #9198a1; }
+
+/* --- footer --- */
+.foot { padding: 96px 0 0; }
+.foot-cta { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr); gap: 48px; align-items: center; }
+.foot-cta h2 { margin: 0 0 10px; }
+.foot-cta p { margin: 0; color: var(--muted); font-size: 1.1rem; }
+.cmd { display: flex; align-items: flex-start; gap: 12px; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 12px 12px 12px 20px; }
+.cmd pre { margin: 0; flex: 1; min-width: 0; overflow-x: auto; padding: 6px 0; font-size: 0.92rem; line-height: 1.85; }
+.cmd .p { color: var(--muted); user-select: none; }
+.cmd .c { color: var(--muted); }
+.cmd .copybtn { flex: none; }
+.belt { margin: 88px 0 0; }
+.belt-box { position: relative; width: 100%; aspect-ratio: 1000 / 230; overflow: hidden; }
+.belt-stage { position: absolute; left: 0; top: 0; width: 1000px; height: 230px; transform-origin: 0 0; }
+.belt-stage svg { position: absolute; inset: 0; overflow: visible; }
+.chip {
+  position: absolute; left: 0; top: 0;
+  width: 146px; height: 42px;
+  padding: 5px 9px 5px 28px;
+  background: var(--surface); border: 1px solid var(--line); border-radius: 8px;
+  font-size: 12px; line-height: 1.22; font-weight: 600; color: var(--ink); text-align: left;
+  will-change: transform, opacity;
 }
-.out-actions { display: flex; gap: 6px; }
-.out-head button { font: inherit; font-family: "Archivo", sans-serif; font-weight: 650; font-size: 0.85rem; color: var(--code-ink); background: transparent; border: 1px solid #3a4170; border-radius: 7px; padding: 5px 11px; cursor: pointer; }
-.out-head button:hover { border-color: #8d93ad; }
-.out-head button.primary { background: #e6e8f2; color: #151933; border-color: #e6e8f2; }
-#yaml {
-  margin: 0;
-  background: var(--code-bg);
-  color: var(--code-ink);
-  border-radius: 0 0 10px 10px;
-  padding: 18px 20px;
-  font-size: 0.8rem;
-  line-height: 1.65;
-  max-height: calc(100vh - 140px);
-  overflow: auto;
-  white-space: pre;
-}
-#yaml .k { color: #9fb0ff; }
-#yaml .c { color: var(--code-dim); }
-#yaml .v { color: #f0c27b; }
-.out-note { margin: 10px 0 0; min-height: 1.5em; font-size: 0.88rem; color: var(--muted); }
+.chip::before { content: ""; position: absolute; left: 9px; top: 8px; width: 12px; height: 12px; border-radius: 50%; border: 2.5px solid var(--open); }
+.chip .n { display: block; font-weight: 400; color: var(--muted); font-size: 11px; }
+.chip .tt { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.chip .stamp { position: absolute; right: -8px; top: 6px; font-size: 13px; padding: 2px 6px 1px; border-width: 2.5px; }
+.tally { text-align: center; margin: 10px 0 0; font-size: 0.95rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+.tally strong { color: var(--ink); }
+.tally .in { color: var(--pass); }
+.foot-links { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px 28px; padding: 40px 0 48px; margin-top: 56px; border-top: 1px solid var(--line); color: var(--muted); font-size: 0.95rem; }
+.foot-links nav a { margin-right: 22px; }
 
 @media (max-width: 1000px) {
-  .builder { grid-template-columns: 1fr; }
-  .output { position: static; }
+  .step { grid-template-columns: 1fr; gap: 28px; padding: 48px 0; }
+  .config { grid-template-columns: 1fr; }
+  .config-left { grid-column: 1; padding: 72px 24px 40px; }
+  .config-right { grid-column: 1; }
+  .output { position: static; max-height: none; }
   #yaml { max-height: 70vh; }
+  .foot-cta { grid-template-columns: minmax(0, 1fr); gap: 24px; }
+  .checks { grid-template-columns: 1fr; }
+}
+@media (max-width: 640px) {
+  .run { grid-template-columns: 1fr; }
+  .run aside { display: none; }
+  .hero { padding: 40px 0 72px; }
+  .sub { font-size: 1.12rem; }
+  .install-pill { font-size: 0.8rem; padding: 10px 10px 10px 14px; }
+  .cmd { padding: 10px 10px 10px 14px; }
+  .cmd pre { font-size: 0.8rem; }
 }
 @media (max-width: 560px) {
+  .config-left { padding: 64px 16px 32px; }
   .field { grid-template-columns: 1fr; }
   .field.toggle { grid-template-columns: minmax(0, 1fr) auto; }
-  .out-head { flex-wrap: wrap; padding: 8px; }
-  .out-head > span:first-child { padding-left: 6px; }
-  .out-head button { padding: 5px 9px; }
   .field input[type=number], .field select { width: 100%; }
   .seg { display: grid; grid-template-columns: repeat(3, 1fr); }
   .seg span { text-align: center; border-left: 0; border-top: 1px solid var(--line); }
   .rule-row { grid-template-columns: minmax(0, 1fr) auto; }
   .rule-row .mini { grid-column: 1; justify-self: start; }
   .rule-row .del { grid-row: 1; grid-column: 2; }
-}
-
-.checks { list-style: none; margin: 32px 0 0; padding: 0; display: grid; grid-template-columns: repeat(2, 1fr); gap: 28px 48px; max-width: 980px; }
-.checks li { padding-left: 18px; border-left: 3px solid var(--bounce); }
-.checks p { margin: 0; color: var(--muted); max-width: none; }
-
-footer { padding: 40px 0 56px; border-top: 1px solid var(--line); color: var(--muted); font-size: 0.95rem; }
-footer .wrap { display: flex; flex-wrap: wrap; gap: 12px 28px; justify-content: space-between; }
-footer nav a { margin-right: 22px; }
-
-@media (max-width: 900px) {
-  .install, .split { grid-template-columns: 1fr; gap: 36px; }
-  .bill-wrap { justify-self: start; }
-  .steps { grid-template-columns: 1fr; gap: 28px; }
-  .checks { grid-template-columns: 1fr; }
-  section.block { padding: 64px 0; }
-}
-@media (max-width: 560px) {
+  .out-head { flex-wrap: wrap; }
+  .mock .body { padding: 14px; }
+  .pr-title { font-size: 18px; }
   .top nav a { margin-left: 14px; }
-  .bill { padding: 22px 18px 20px; }
 }
 </style>
 </head>
 <body>
 <script>document.documentElement.classList.add("js")</script>
 
-<header class="masthead">
-<div class="wrap">
-  <div class="top">
-    <a class="brand" href="/">gh bouncer</a>
-    <nav>
-      <a href="#how">How it works</a>
-      <a href="#config">Config</a>
-      <a href="https://github.com/gh-bouncer/gh-bouncer">GitHub</a>
-    </nav>
-  </div>
-
+<header class="dark masthead">
+  <div class="wrap">
+    <div class="top">
+      <a class="brand" href="/">gh bouncer</a>
+      <nav>
+        <a href="#how">How it works</a>
+        <a href="#config">Config</a>
+        <a href="https://github.com/gh-bouncer/gh-bouncer">GitHub</a>
+      </nav>
+    </div>
     <div class="hero">
       <h1>PRs pay their own cover.</h1>
-      <p class="not-saas">Outside pull requests get a thorough AI review <strong>on their author's own API key</strong> before they reach you. No service. No bill.</p>
-
-      <figure class="scene" aria-label="Animation: a machine called the Vibe Grinder floods a conveyor belt with AI-generated pull requests. A robot bouncer shows a raised hand and stamps nearly all of them BOUNCED and throws them on a pile. Now and then it shows a thumbs up, a good one is stamped PASSED and let through the door to your repository.">
-        <div class="stage-box" id="stage-box">
-          <div class="stage" id="stage">
-            <svg class="scenery" viewBox="0 0 1000 420" aria-hidden="true">
-              <line x1="0" y1="392" x2="1000" y2="392" stroke="#30363d" stroke-width="2"/>
-
-              <!-- the slop machine -->
-              <g class="machine">
-                <circle class="puff" cx="196" cy="34" r="12" fill="#6e7681"/>
-                <circle class="puff p2" cx="192" cy="34" r="10" fill="#6e7681"/>
-                <circle class="puff p3" cx="200" cy="34" r="11" fill="#6e7681"/>
-                <rect x="182" y="34" width="28" height="56" rx="3" fill="#3a4250"/>
-                <polygon points="44,98 224,98 246,62 22,62" fill="#3a4250"/>
-                <rect x="36" y="96" width="196" height="296" rx="16" fill="#262c36"/>
-                <rect x="54" y="118" width="160" height="40" rx="5" fill="#f4f5f8"/>
-                <text x="134" y="145" text-anchor="middle" font-family="Archivo, sans-serif" font-weight="900" font-size="19" style="font-variation-settings:'wdth' 70" fill="#151933" letter-spacing="0.5">VIBE GRINDER</text>
-                <g>
-                  <circle class="lamp" cx="70" cy="182" r="6" fill="#c4122f"/>
-                  <circle class="lamp" cx="90" cy="182" r="6" fill="#e2a420"/>
-                  <circle class="lamp" cx="110" cy="182" r="6" fill="#2f45d9"/>
-                </g>
-                <text x="210" y="186" text-anchor="end" font-family="JetBrains Mono, monospace" font-size="10" fill="#8b949e">PRs/min: ∞</text>
-                <g class="gear">
-                  <circle cx="92" cy="270" r="34" fill="none" stroke="#3a4250" stroke-width="12" stroke-dasharray="9 7"/>
-                  <circle cx="92" cy="270" r="22" fill="#3a4250"/>
-                  <circle cx="92" cy="270" r="7" fill="#262c36"/>
-                </g>
-                <g class="gear rev">
-                  <circle cx="160" cy="320" r="24" fill="none" stroke="#3a4250" stroke-width="10" stroke-dasharray="7 6"/>
-                  <circle cx="160" cy="320" r="15" fill="#3a4250"/>
-                  <circle cx="160" cy="320" r="5" fill="#262c36"/>
-                </g>
-                <rect x="222" y="268" width="40" height="46" rx="4" fill="#3a4250"/>
-                <rect x="232" y="276" width="30" height="30" rx="2" fill="#010409"/>
-              </g>
-
-              <!-- conveyor -->
-              <rect x="258" y="318" width="420" height="16" rx="8" fill="#262c36"/>
-              <line class="belt-dash" x1="266" y1="326" x2="670" y2="326" stroke="#7d8590" stroke-width="3" stroke-dasharray="12 12"/>
-              <circle cx="272" cy="326" r="5" fill="#3a4250"/><circle cx="664" cy="326" r="5" fill="#3a4250"/>
-              <rect x="300" y="334" width="8" height="58" fill="#3a4250"/>
-              <rect x="628" y="334" width="8" height="58" fill="#3a4250"/>
-
-              <!-- the door -->
-              <rect x="822" y="126" width="148" height="30" rx="4" fill="#f4f5f8" stroke="#151933" stroke-width="2"/>
-              <text x="896" y="146" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="14" font-weight="600" fill="#151933">your/repo</text>
-              <rect x="828" y="160" width="136" height="232" rx="4" fill="#262c36"/>
-              <rect x="842" y="174" width="108" height="218" fill="#010409"/>
-              <rect id="door-glow" x="842" y="174" width="108" height="218" fill="#79a1ff" opacity="0"/>
-
-              <!-- velvet rope -->
-              <rect x="762" y="262" width="8" height="130" rx="3" fill="#3a4250"/>
-              <circle cx="766" cy="260" r="8" fill="#e2a420"/>
-              <rect x="820" y="262" width="8" height="130" rx="3" fill="#3a4250"/>
-              <circle cx="824" cy="260" r="8" fill="#e2a420"/>
-              <g id="rope" style="transform-origin: 766px 264px">
-                <path d="M766 264 Q795 300 824 264" fill="none" stroke="#c4122f" stroke-width="7" stroke-linecap="round"/>
-              </g>
-
-              <!-- the bouncer: a robot with a screen for a face -->
-              <g transform="translate(-10 0)">
-                <rect x="692" y="318" width="20" height="70" rx="4" fill="#3a4250"/>
-                <rect x="724" y="318" width="20" height="70" rx="4" fill="#3a4250"/>
-                <rect x="686" y="382" width="30" height="10" rx="3" fill="#4b5563"/>
-                <rect x="720" y="382" width="30" height="10" rx="3" fill="#4b5563"/>
-                <rect x="676" y="212" width="84" height="112" rx="12" fill="#4b5563"/>
-                <rect x="690" y="226" width="56" height="34" rx="5" fill="#2b313b"/>
-                <text x="718" y="248" text-anchor="middle" font-family="Archivo, sans-serif" font-weight="900" font-size="9.5" style="font-variation-settings:'wdth' 110" fill="#e6edf3" letter-spacing="1">BOUNCER</text>
-                <circle cx="700" cy="286" r="5" fill="#3fb950"/><circle cx="716" cy="286" r="5" fill="#e3b341"/><circle cx="732" cy="286" r="5" fill="#2b313b"/>
-                <rect x="660" y="222" width="16" height="70" rx="8" fill="#3a4250"/>
-                <rect x="760" y="222" width="16" height="70" rx="8" fill="#3a4250"/>
-                <rect x="708" y="198" width="20" height="16" rx="3" fill="#3a4250"/>
-                <g id="head" style="transform-origin: 718px 200px">
-                  <line x1="718" y1="122" x2="718" y2="108" stroke="#9198a1" stroke-width="3"/>
-                  <circle class="lamp" cx="718" cy="105" r="5" fill="#e3b341"/>
-                  <rect x="674" y="122" width="88" height="78" rx="14" fill="#c9d1d9"/>
-                  <rect x="684" y="132" width="68" height="58" rx="8" fill="#010409"/>
-                  <g id="eyes" fill="#3fb950">
-                    <rect x="701" y="152" width="9" height="14" rx="2"/>
-                    <rect x="726" y="152" width="9" height="14" rx="2"/>
-                  </g>
-                  <text id="face" x="718" y="173" text-anchor="middle" font-size="34" visibility="hidden">👍</text>
-                </g>
-              </g>
-            </svg>
-            <div class="cards" id="cards"></div>
-          </div>
-        </div>
-        <figcaption class="tally" aria-hidden="true"><strong id="n-pushed">0</strong> pull requests pushed, <strong class="in" id="n-in">0</strong> let in.</figcaption>
-      </figure>
+      <p class="sub">Outside pull requests are reviewed by <strong>the contributor's own AI, in their own GitHub Actions</strong>, before they ever reach you.</p>
+      <ul class="facts">
+        <li>No account</li>
+        <li>No server</li>
+        <li>No bill</li>
+        <li>Just <a href="https://github.com/gh-bouncer">two public repos</a></li>
+      </ul>
+      <div class="install-pill"><code><span class="p">$ </span>gh extension install gh-bouncer/gh-bouncer</code><button type="button" class="copybtn" data-copy="gh extension install gh-bouncer/gh-bouncer">Copy</button></div>
+      <p class="then">Then run <code>gh bouncer init</code> in your repository.</p>
     </div>
-
-</div>
+  </div>
 </header>
 
-<div class="wrap">
-  <main>
-    <div class="install">
-      <div>
-        <h2>For maintainers</h2>
-        <p>Run init in your project. It opens a pull request that adds one workflow file and one settings file.</p>
-        <pre class="cmd"><span class="p">$ </span>gh extension install gh-bouncer/gh-bouncer
-<span class="p">$ </span>gh bouncer init</pre>
-        <p class="after"><a href="#config">Build your <code>.bouncer.yml</code></a></p>
+<main>
+  <section class="story" id="how">
+    <div class="wrap">
+      <h2>How a pull request gets in</h2>
+
+      <div class="step">
+        <div class="step-text reveal">
+          <span class="n">1</span>
+          <h3>Someone outside your team opens a pull request</h3>
+          <p>The bouncer holds it as a draft and leaves one comment: the command to run. Your team walks straight in.</p>
+        </div>
+        <div class="mock reveal" aria-label="A pull request page with the bouncer's comment">
+          <div class="bar"><i></i><i></i><i></i><span>github.com/acme/widget/pull/412</span></div>
+          <div class="body">
+            <h4 class="pr-title">Add retry to fetch() <span class="num">#412</span></h4>
+            <div class="pr-meta"><span class="state draft">Draft</span><span><b>drive-by-dev</b> wants to merge 1 commit into <code>main</code></span><span class="ghl pending">bouncer:pending</span></div>
+            <div class="tl">
+              <div class="cmt">
+                <div class="av u">D</div>
+                <div class="box"><div class="hd"><b>drive-by-dev</b> commented</div><div class="bd"><p>This PR improves robustness and overall code quality ✨</p></div></div>
+              </div>
+              <div class="event slide-in"><span class="dot">⦿</span><span><b>github-actions</b> added the <span class="ghl pending">bouncer:pending</span> label and marked this as a draft</span></div>
+              <div class="cmt slide-in">
+                <div class="av bot">✋</div>
+                <div class="box">
+                  <div class="hd"><b>github-actions</b> <span class="badge">bot</span> commented</div>
+                  <div class="bd">
+                    <h4>🚪 Bouncer review required</h4>
+                    <p>This project has an automated bouncer review outside pull requests before a maintainer looks at them. The review runs in your fork, on your own Anthropic API key.</p>
+<pre>gh extension install gh-bouncer/gh-bouncer
+gh bouncer https://github.com/acme/widget/pull/412</pre>
+                    <p class="muted">Deadline: 48 hours. Review rounds left: 3.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
-      <div>
-        <h2>For contributors</h2>
-        <p>Run the command from the bouncer's comment. It reviews your pull request in your fork, on your key.</p>
-        <pre class="cmd"><span class="p">$ </span>gh extension install gh-bouncer/gh-bouncer
-<span class="p">$ </span>gh bouncer https://github.com/owner/repo/pull/123</pre>
-        <p class="after">See one that <a href="https://github.com/gh-bouncer/bouncer-test/pull/1">passed</a> and one that <a href="https://github.com/gh-bouncer/bouncer-test/pull/2">got bounced</a></p>
+
+      <div class="step">
+        <div class="step-text reveal">
+          <span class="n">2</span>
+          <h3>They run <code>gh bouncer</code></h3>
+          <p>One command sets up their fork, stores their API key as a secret there, and starts the review.</p>
+        </div>
+        <div class="term reveal" aria-label="A terminal running gh bouncer">
+          <div class="bar mock-bar"><i></i><i></i><i></i><span>drive-by-dev ~ zsh</span></div>
+          <pre id="term-out"></pre>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-text reveal">
+          <span class="n">3</span>
+          <h3>Their GitHub Actions do the work</h3>
+          <p>The review runs in their fork, on their key, against your rules. It reads the code, checks for duplicates, and GitHub signs the result.</p>
+        </div>
+        <div class="mock reveal" aria-label="A GitHub Actions run of the bouncer review">
+          <div class="bar"><i></i><i></i><i></i><span>github.com/drive-by-dev/widget/actions</span></div>
+          <div class="run">
+            <aside>
+              <div class="it">Summary</div>
+              <div class="lab">Jobs</div>
+              <div class="it on">review / review</div>
+            </aside>
+            <main>
+              <h4>Bouncer review</h4>
+              <div class="rmeta">Running in drive-by-dev/widget, on the contributor's key</div>
+              <ol class="steps-list" id="run-steps">
+                <li><span class="ico"></span><span class="t">Set up job</span><span class="d">2s</span></li>
+                <li><span class="ico"></span><span class="t">Locate bouncer source</span><span class="d">1s</span></li>
+                <li><span class="ico"></span><span class="t">Check out bouncer</span><span class="d">1s</span></li>
+                <li><span class="ico"></span><span class="t">Install</span><span class="d">6s</span></li>
+                <li><span class="ico"></span><span class="t">Resolve pull request</span><span class="d">1s</span></li>
+                <li><span class="ico"></span><span class="t">Check out upstream base branch (read only)</span><span class="d">2s</span></li>
+                <li><span class="ico"></span><span class="t">Check out pull request head (read only, never executed)</span><span class="d">2s</span></li>
+                <li><span class="ico"></span><span class="t">Review</span><span class="d">2m 41s</span></li>
+                <li><span class="ico"></span><span class="t">Sign the review</span><span class="d">3s</span></li>
+                <li><span class="ico"></span><span class="t">Keep the report</span><span class="d">1s</span></li>
+              </ol>
+              <div class="statusrow">Status <span class="s" id="run-status">In progress</span></div>
+            </main>
+          </div>
+        </div>
+      </div>
+
+      <div class="step outcome">
+        <div class="step-text reveal">
+          <span class="n">4</span>
+          <h3>You only see the ones that pass</h3>
+          <p>A pass reaches you with the review attached. A bounce is closed with the reasons, and the author can fix it and try again.</p>
+        </div>
+        <div class="reveal">
+          <div class="tabs" role="tablist" aria-label="Outcome">
+            <button role="tab" id="tab-pass" aria-controls="panel-pass" aria-selected="true"><span class="e">👍</span>Passed</button>
+            <button role="tab" id="tab-fail" aria-controls="panel-fail" aria-selected="false" tabindex="-1"><span class="e">✋</span>Bounced</button>
+          </div>
+          <div class="mock" role="tabpanel" id="panel-pass" aria-labelledby="tab-pass">
+            <div class="bar"><i></i><i></i><i></i><span>github.com/acme/widget/pull/415</span></div>
+            <div class="body">
+              <span class="stamp pass" aria-hidden="true">PASSED</span>
+              <h4 class="pr-title">Fix off-by-one in pager <span class="num">#415</span></h4>
+              <div class="pr-meta"><span class="state open">Open</span><span class="ghl passl">bouncer:pass</span><span>Fixes #398</span></div>
+              <div class="cmt">
+                <div class="av bot">👍</div>
+                <div class="box">
+                  <div class="hd"><b>github-actions</b> <span class="badge">bot</span> commented</div>
+                  <div class="bd">
+                    <h4>✅ Bouncer review: Passed</h4>
+                    <p>Fixes the boundary check in <code>paginate()</code> so the last page is no longer dropped, with a regression test. Worth your time.</p>
+                    <ul class="rulelist">
+                      <li>✅ <code>solves-linked-issue</code> Matches the repro in #398</li>
+                      <li>✅ <code>correct</code> Boundary now inclusive, test covers it</li>
+                      <li>✅ <code>has-tests</code> Adds <code>test_last_page</code></li>
+                    </ul>
+                    <p class="muted">Reviewed on the contributor's API key. Signed run.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="mock" role="tabpanel" id="panel-fail" aria-labelledby="tab-fail" hidden>
+            <div class="bar"><i></i><i></i><i></i><span>github.com/acme/widget/pull/412</span></div>
+            <div class="body">
+              <span class="stamp bounce" aria-hidden="true">BOUNCED</span>
+              <h4 class="pr-title">Add retry to fetch() <span class="num">#412</span></h4>
+              <div class="pr-meta"><span class="state closed">Closed</span><span class="ghl faill">bouncer:fail</span></div>
+              <div class="cmt">
+                <div class="av bot">✋</div>
+                <div class="box">
+                  <div class="hd"><b>github-actions</b> <span class="badge">bot</span> commented</div>
+                  <div class="bd">
+                    <h4>⛔ Bouncer review: Bounced</h4>
+                    <p><b>Why it was bounced</b></p>
+                    <ul class="why">
+                      <li><code>not-duplicate</code> Retry already landed in #377.</li>
+                      <li><code>correct</code> Calls <code>http.retry()</code>, which doesn't exist here.</li>
+                    </ul>
+                    <p class="muted">Push fixes and reopen for another review (2 rounds left).</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
+  </section>
 
-    <section class="block" id="not-a-service">
-      <div class="split">
-        <div>
-          <h2>There's nothing to sign up for</h2>
-          <p>Bouncer isn't a hosted product. It's code that runs in places you already have.</p>
-          <ul class="isnt">
-            <li><strong>No account.</strong> <span>Nobody to log in to, no dashboard, no seats.</span></li>
-            <li><strong>No server.</strong> <span>The gate runs in your repository's GitHub Actions. The review runs in the contributor's fork.</span></li>
-            <li><strong>No one holding keys.</strong> <span>A contributor's API key goes straight into their own fork's secrets and stays there.</span></li>
-            <li><strong>No bill.</strong> <span>Public repositories get Actions minutes for free. The reviews are paid for by the people asking for your time.</span></li>
-          </ul>
-          <p style="margin-top:22px">The whole thing is two public repositories, <a href="https://github.com/gh-bouncer/action">the action</a> and <a href="https://github.com/gh-bouncer/gh-bouncer">the extension</a>. Read every line.</p>
-        </div>
-        <div class="bill-wrap">
-          <div class="bill">
-            <h3>Your monthly bill</h3>
-            <p class="sub">Maintainer of a busy public repository</p>
-            <table>
-              <tr><td>Subscription</td><td>$0.00</td></tr>
-              <tr><td>Servers</td><td>$0.00</td></tr>
-              <tr><td>Gate runs<span class="paid">GitHub Actions, public repository</span></td><td>$0.00</td></tr>
-              <tr><td>AI reviews of 214 pull requests<span class="paid">paid by each contributor</span></td><td>$0.00</td></tr>
-              <tr><td>Evenings spent closing slop</td><td>$0.00</td></tr>
-              <tr class="total"><td>Total</td><td>$0.00</td></tr>
-            </table>
-          </div>
-          <span class="stamp pass" aria-hidden="true">NO CHARGE</span>
-        </div>
-      </div>
+  <section class="block">
+    <div class="wrap">
+      <h2>A pass can't be faked</h2>
+      <ul class="checks">
+        <li><h3>Signed by GitHub</h3><p>Every review is signed by GitHub as the output of the bouncer's own workflow. Edit the workflow, or run it anywhere but GitHub's runners, and the signature no longer matches.</p></li>
+        <li><h3>Your settings, not theirs</h3><p>The model, effort and rules come from your repository. The contributor supplies a key and nothing else.</p></li>
+        <li><h3>First review counts</h3><p>Every review of the same commit is recorded, and only the earliest one counts. Re-rolling until the model says yes doesn't work.</p></li>
+        <li><h3>Untrusted text stays data</h3><p>Instructions hidden in a pull request aimed at the reviewer are flagged and fail it. The final call is made in code, from verified evidence.</p></li>
+      </ul>
+    </div>
     </section>
 
-    <section class="block" id="how">
-      <h2>How a pull request gets in</h2>
-      <ol class="steps">
-        <li>
-          <h3>An outsider opens a pull request</h3>
-          <p>It's held as a draft with one command to run. Your team walks straight in.</p>
-        </li>
-        <li>
-          <h3>They run <code>gh bouncer</code></h3>
-          <p>A thorough review runs in their fork, on their key, against your rules.</p>
-        </li>
-        <li>
-          <h3>The bouncer checks the signature</h3>
-          <p>Pass: it's yours to review, report attached. Fail: closed, with the reasons.</p>
-        </li>
-      </ol>
-    </section>
-
-    <section class="block" id="config">
-      <h2>Your door, your rules</h2>
-      <p class="docs-intro">Set it up here and copy the file into your repository as <code>.bouncer.yml</code>. <code>gh bouncer init</code> starts you with these defaults. Contributors can't change any of it.</p>
-      <div class="builder">
+  <section class="config" id="config">
+    <div class="config-left">
+      <h2>Config</h2>
+      <p class="docs-intro">Everything lives in <code>.bouncer.yml</code> in your repository. Set it up here and copy the file. <code>gh bouncer init</code> starts you with these defaults, and contributors can't change any of it.</p>
         <form class="controls" id="builder" autocomplete="off" onsubmit="return false">
 
           <fieldset class="group">
@@ -734,7 +700,8 @@ footer nav a { margin-right: 22px; }
             <button type="button" class="add" id="add-rule">Add a rule</button>
           </fieldset>
         </form>
-
+    </div>
+    <div class="config-right">
         <div class="output">
           <div class="out-head">
             <span>.bouncer.yml</span>
@@ -747,169 +714,50 @@ footer nav a { margin-right: 22px; }
           <pre id="yaml" tabindex="0" aria-label="Generated .bouncer.yml"></pre>
           <p class="out-note" id="out-note" role="status"></p>
         </div>
-      </div>
-    </section>
+    </div>
+  </section>
+</main>
 
-    <section class="block">
-      <h2>A pass can't be faked</h2>
-      <ul class="checks">
-        <li><h3>Signed by GitHub</h3><p>Every review is signed by GitHub as the output of the bouncer's own workflow. Edit the workflow, or run it anywhere but GitHub's runners, and the signature no longer matches.</p></li>
-        <li><h3>Your settings, not theirs</h3><p>The model, effort and rules come from your repository. The contributor supplies a key and nothing else.</p></li>
-        <li><h3>First review counts</h3><p>Every review of the same commit is recorded, and only the earliest one counts. Re-rolling until the model says yes doesn't work.</p></li>
-        <li><h3>Untrusted text stays data</h3><p>Instructions hidden in a pull request aimed at the reviewer are flagged and fail it. The final call is made in code, from verified evidence.</p></li>
-      </ul>
-    </section>
-  </main>
-</div>
-
-<footer>
+<footer class="dark foot">
   <div class="wrap">
-    <nav>
-      <a href="https://github.com/gh-bouncer/gh-bouncer">gh-bouncer</a>
-      <a href="https://github.com/gh-bouncer/action">action</a>
-    </nav>
-    <span>Made by <a href="https://github.com/dillingham">Brian Dillingham</a></span>
+    <div class="foot-cta">
+      <div>
+        <h2>Maintainers, need a bouncer?</h2>
+        <p>Install the extension and run <code>init</code>. It opens a pull request with one workflow file and your <code>.bouncer.yml</code>.</p>
+      </div>
+      <div class="cmd"><pre><span class="p">$ </span>gh extension install gh-bouncer/gh-bouncer
+<span class="p">$ </span>gh bouncer init</pre><button type="button" class="copybtn" data-copy="gh extension install gh-bouncer/gh-bouncer&#10;gh bouncer init">Copy</button></div>
+    </div>
+
+    <figure class="belt" aria-label="Animation: pull requests ride a conveyor belt past a screen. It shows a raised hand for most of them, and they're stamped BOUNCED and dropped. Now and then it shows a thumbs up, and the pull request is stamped PASSED and rolls on.">
+      <div class="belt-box" id="belt-box">
+        <div class="belt-stage" id="belt-stage">
+          <svg viewBox="0 0 1000 230" width="1000" height="230" aria-hidden="true">
+            <line x1="0" y1="184" x2="1000" y2="184" stroke="#30363d" stroke-width="2"/>
+            <line class="belt-dash" x1="0" y1="184" x2="1000" y2="184" stroke="#9198a1" stroke-width="2" stroke-dasharray="2 22"/>
+            <line x1="500" y1="96" x2="500" y2="130" stroke="#30363d" stroke-width="2"/>
+            <rect x="452" y="14" width="96" height="82" rx="14" fill="#161b22" stroke="#30363d" stroke-width="2"/>
+            <rect x="462" y="24" width="76" height="62" rx="8" fill="#010409"/>
+            <g id="eyes" fill="#3fb950"><rect x="483" y="46" width="9" height="15" rx="2"/><rect x="508" y="46" width="9" height="15" rx="2"/></g>
+            <text id="face" x="500" y="69" text-anchor="middle" font-size="34" visibility="hidden">👍</text>
+          </svg>
+          <div id="belt-cards"></div>
+        </div>
+      </div>
+      <figcaption class="tally" aria-hidden="true"><strong id="n-pushed">0</strong> pushed, <strong class="in" id="n-in">0</strong> let in</figcaption>
+    </figure>
+
+    <div class="foot-links">
+      <nav>
+        <a href="https://github.com/gh-bouncer/gh-bouncer">gh-bouncer</a>
+        <a href="https://github.com/gh-bouncer/action">action</a>
+      </nav>
+      <span>Made by <a href="https://github.com/dillingham">Brian Dillingham</a></span>
+    </div>
   </div>
 </footer>
 
 <script>
-(function () {
-  var box = document.getElementById("stage-box");
-  var stage = document.getElementById("stage");
-  var cards = document.getElementById("cards");
-  var head = document.getElementById("head");
-  var eyes = document.getElementById("eyes");
-  var face = document.getElementById("face");
-  var rope = document.getElementById("rope");
-  var glow = document.getElementById("door-glow");
-  var nPushed = document.getElementById("n-pushed");
-  var nIn = document.getElementById("n-in");
-  var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-
-  function fit() { stage.style.transform = "scale(" + box.clientWidth / 1000 + ")"; }
-  fit();
-  window.addEventListener("resize", fit);
-
-  var SLOP = [
-    "Improve code quality ✨", "Refactor everything for readability", "Fix typo (adds 3 dependencies)",
-    "Add AI-powered TODO resolver", "Rewrite core in Rust", "Optimize imports", "Fix #1 (does not fix #1)",
-    "Add comprehensive docstrings", "Enhance error handling", "Update README.md", "Modernize codebase",
-    "Add blockchain support", "Fix all the bugs", "Convert tabs to spaces", "Boost performance by 1000%",
-    "Add missing semicolons", "Move utils into utils2", "Replace tests with vibes"
-  ];
-  var GOOD = ["Fix off-by-one in pager (+tests)", "Handle empty input in parse()", "Fix race in cache eviction (+test)"];
-
-  var BELT_Y = 276, START_X = 254, CHECK_X = 520, DOOR_X = 860;
-  var pushed = 0, letIn = 0, si = 0, gi = 0, pile = [];
-
-  function chip(title, num) {
-    var el = document.createElement("div");
-    el.className = "chip";
-    el.innerHTML = '<span class="n"></span><span class="tt"></span>';
-    el.querySelector(".n").textContent = "#" + num;
-    el.querySelector(".tt").textContent = title;
-    cards.appendChild(el);
-    return el;
-  }
-  function stampOn(el, good) {
-    var s = document.createElement("span");
-    s.className = "stamp " + (good ? "pass" : "bounce");
-    s.textContent = good ? "PASSED" : "BOUNCED";
-    el.appendChild(s);
-    if (!reduce) s.animate([{ opacity: 0, scale: 1.8 }, { opacity: 1, scale: 0.92, offset: 0.6 }, { opacity: 1, scale: 1 }], { duration: 260, easing: "cubic-bezier(.2,.9,.3,1.25)", fill: "forwards" });
-  }
-  function pilePos() { return { x: 296 + Math.random() * 250, y: 332 + Math.random() * 22, r: Math.random() * 40 - 20 }; }
-  function tr(x, y, r, s) { return "translate(" + x + "px," + y + "px) rotate(" + (r || 0) + "deg) scale(" + (s || 1) + ")"; }
-
-  if (reduce || !Element.prototype.animate) {
-    // A still frame: a pile of rejects, two in line, one going through the door.
-    for (var i = 0; i < 9; i++) {
-      var p = pilePos(), e = chip(SLOP[i], 200 + i);
-      e.style.transform = tr(p.x, p.y, p.r, 0.82);
-      stampOn(e, false); e.classList.add("out");
-    }
-    var a = chip(SLOP[10], 211); a.style.transform = tr(300, BELT_Y);
-    var b = chip(SLOP[11], 212); b.style.transform = tr(CHECK_X, BELT_Y); stampOn(b, false);
-    var g = chip(GOOD[0], 209); g.style.transform = tr(DOOR_X - 70, BELT_Y - 40, 0, 0.9); stampOn(g, true);
-    nPushed.textContent = "214"; nIn.textContent = "9";
-    face.textContent = "✋"; face.setAttribute("visibility", "visible"); eyes.setAttribute("visibility", "hidden");
-    return;
-  }
-
-  function wait(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
-  var faceTimer = null;
-  function showFace(e) {
-    face.textContent = e;
-    face.setAttribute("visibility", "visible");
-    eyes.setAttribute("visibility", "hidden");
-    clearTimeout(faceTimer);
-    faceTimer = setTimeout(function () {
-      face.setAttribute("visibility", "hidden");
-      eyes.setAttribute("visibility", "visible");
-    }, 650);
-  }
-  function move(el, from, to, ms, easing) {
-    return el.animate([{ transform: from }, { transform: to }], { duration: ms, easing: easing || "linear", fill: "forwards" }).finished;
-  }
-
-  var queue = Promise.resolve();
-  function launch() {
-    pushed++;
-    nPushed.textContent = pushed;
-    var good = pushed > 3 && pushed % 8 === 0;
-    var title = good ? GOOD[gi++ % GOOD.length] : SLOP[si++ % SLOP.length];
-    var el = chip(title, 100 + pushed);
-    var ride = move(el, tr(START_X - 40, BELT_Y + 6, 0, 0.6), tr(START_X, BELT_Y), 220, "ease-out")
-      .then(function () { return move(el, tr(START_X, BELT_Y), tr(CHECK_X - 14, BELT_Y), 1150); });
-    // the bouncer sees one at a time
-    queue = Promise.all([queue, ride]).then(function () {
-      return move(el, tr(CHECK_X - 14, BELT_Y), tr(CHECK_X, BELT_Y), 120).then(function () {
-        // thumbs up or a raised hand on the screen
-        showFace(good ? "👍" : "✋");
-        head.animate([{ translate: "0 0" }, { translate: "0 -4px" }, { translate: "0 0" }], { duration: 300, easing: "ease-out" });
-        return wait(300);
-      }).then(function () { stampOn(el, good); return wait(240); });
-    });
-    queue.then(function () {
-      if (good) {
-        letIn++;
-        nIn.textContent = letIn;
-        rope.animate([{ rotate: "0deg" }, { rotate: "-75deg", offset: 0.3 }, { rotate: "-75deg", offset: 0.8 }, { rotate: "0deg" }], { duration: 1300, easing: "ease-in-out" });
-        glow.animate([{ opacity: 0 }, { opacity: 0.35, offset: 0.6 }, { opacity: 0 }], { duration: 1300 });
-        return move(el, tr(CHECK_X, BELT_Y), tr(DOOR_X - 10, BELT_Y - 40, 0, 0.9), 700, "ease-in")
-          .then(function () {
-            return el.animate([{ transform: tr(DOOR_X - 10, BELT_Y - 40, 0, 0.9), opacity: 1 }, { transform: tr(DOOR_X + 10, BELT_Y - 40, 0, 0.5), opacity: 0 }], { duration: 400, fill: "forwards" }).finished;
-          })
-          .then(function () { el.remove(); });
-      }
-      var p = pilePos();
-      var midX = (CHECK_X + p.x) / 2, peakY = 110 + Math.random() * 70;
-      return el.animate([
-        { transform: tr(CHECK_X, BELT_Y, 0, 1) },
-        { transform: tr(midX, peakY, p.r * -3, 0.95), offset: 0.45 },
-        { transform: tr(p.x, p.y, p.r, 0.82) }
-      ], { duration: 820, easing: "cubic-bezier(.3,.1,.5,1)", fill: "forwards" }).finished.then(function () {
-        el.classList.add("out");
-        pile.push(el);
-        if (pile.length > 22) {
-          var old = pile.shift();
-          old.animate([{ opacity: 0.85 }, { opacity: 0 }], { duration: 400, fill: "forwards" }).onfinish = function () { old.remove(); };
-        }
-      });
-    });
-  }
-
-  // run only while the scene is on screen and the tab is visible
-  var timer = null, onScreen = true;
-  function start() { if (!timer && onScreen && !document.hidden) { launch(); timer = setInterval(launch, 1000); } }
-  function stop() { clearInterval(timer); timer = null; }
-  if ("IntersectionObserver" in window) {
-    new IntersectionObserver(function (es) { onScreen = es[0].isIntersecting; onScreen ? start() : stop(); }).observe(box);
-  } else { start(); }
-  document.addEventListener("visibilitychange", function () { document.hidden ? stop() : start(); });
-})();
-
-
 // .bouncer.yml builder
 (function () {
   var DEFAULT_RULES = [
@@ -1200,6 +1048,188 @@ footer nav a { margin-right: 22px; }
   reset();
   window.__bouncerYaml = function () { return plain(out.innerHTML); };
 })();
+
+
+// copy buttons
+document.querySelectorAll(".copybtn").forEach(function (b) {
+  b.addEventListener("click", function () {
+    var text = b.getAttribute("data-copy");
+    if (!navigator.clipboard) return;
+    navigator.clipboard.writeText(text).then(function () { b.textContent = "Copied"; setTimeout(function () { b.textContent = "Copy"; }, 1400); });
+  });
+});
+
+// scroll story
+(function () {
+  var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var termOut = document.getElementById("term-out");
+  var CMD = "gh bouncer https://github.com/acme/widget/pull/412";
+  var LINES = [
+    ['dim', "Reviewing https://github.com/acme/widget/pull/412 from drive-by-dev/widget"],
+    ['', "Turned on the review workflow in drive-by-dev/widget."],
+    ['', "Anthropic API key (stored only as a secret in drive-by-dev/widget): ••••••••••••"],
+    ['', "Stored ANTHROPIC_API_KEY as a secret in drive-by-dev/widget."],
+    ['', "Review running: https://github.com/drive-by-dev/widget/actions/runs/1849"],
+    ['ok', "✓ review / review completed in 2m 58s"],
+    ['', "Done. The gate is checking your signed review now."]
+  ];
+  function esc(s) { return s.replace(/&/g, "&amp;").replace(/</g, "&lt;"); }
+  function termFinal() {
+    termOut.innerHTML = '<span class="pr">$</span> ' + esc(CMD) + "\n" + LINES.map(function (l) { return l[0] ? '<span class="' + l[0] + '">' + esc(l[1]) + "</span>" : esc(l[1]); }).join("\n");
+  }
+  function termPlay() {
+    var i = 0, typed = "";
+    termOut.innerHTML = '<span class="pr">$</span> <span class="cursor"></span>';
+    (function type() {
+      if (i < CMD.length) {
+        typed += CMD[i++];
+        termOut.innerHTML = '<span class="pr">$</span> ' + esc(typed) + '<span class="cursor"></span>';
+        setTimeout(type, 28 + Math.random() * 40);
+        return;
+      }
+      var j = 0, html = '<span class="pr">$</span> ' + esc(CMD) + "\n";
+      (function line() {
+        if (j >= LINES.length) { termOut.innerHTML = html + '<span class="pr">$</span> <span class="cursor"></span>'; return; }
+        var l = LINES[j++];
+        html += (l[0] ? '<span class="' + l[0] + '">' + esc(l[1]) + "</span>" : esc(l[1])) + "\n";
+        termOut.innerHTML = html + '<span class="cursor"></span>';
+        setTimeout(line, j === 5 ? 1300 : 420);
+      })();
+    })();
+  }
+
+  var steps = document.querySelectorAll("#run-steps li");
+  var status = document.getElementById("run-status");
+  function runFinal() { steps.forEach(function (s) { s.className = "done"; }); status.textContent = "Success"; status.classList.add("ok"); }
+  function runPlay() {
+    var k = 0;
+    (function next() {
+      if (k > 0) steps[k - 1].className = "done";
+      if (k >= steps.length) { status.textContent = "Success"; status.classList.add("ok"); return; }
+      steps[k].className = "run-now";
+      var slow = steps[k].querySelector(".t").textContent === "Review";
+      k++;
+      setTimeout(next, slow ? 1800 : 260);
+    })();
+  }
+
+  if (reduce || !("IntersectionObserver" in window)) {
+    document.querySelectorAll(".reveal").forEach(function (e) { e.classList.add("in"); });
+    termFinal(); runFinal();
+  } else {
+    termOut.innerHTML = '<span class="pr">$</span> <span class="cursor"></span>';
+    var played = {};
+    var io = new IntersectionObserver(function (es) {
+      es.forEach(function (e) {
+        if (!e.isIntersecting) return;
+        e.target.classList.add("in");
+        io.unobserve(e.target);
+        if (e.target.classList.contains("term") && !played.t) { played.t = 1; setTimeout(termPlay, 400); }
+        if (e.target.querySelector && e.target.querySelector("#run-steps") && !played.r) { played.r = 1; setTimeout(runPlay, 400); }
+      });
+    }, { threshold: 0.35 });
+    document.querySelectorAll(".reveal").forEach(function (e) { io.observe(e); });
+  }
+
+  // outcome tabs
+  var tabs = [document.getElementById("tab-pass"), document.getElementById("tab-fail")];
+  function select(t) {
+    tabs.forEach(function (x) {
+      var on = x === t;
+      x.setAttribute("aria-selected", on);
+      x.tabIndex = on ? 0 : -1;
+      document.getElementById(x.getAttribute("aria-controls")).hidden = !on;
+    });
+  }
+  tabs.forEach(function (t, i) {
+    t.addEventListener("click", function () { select(t); });
+    t.addEventListener("keydown", function (e) {
+      if (e.key === "ArrowRight" || e.key === "ArrowLeft") { var n = tabs[(i + 1) % 2]; select(n); n.focus(); }
+    });
+  });
+})();
+
+// footer belt
+(function () {
+  var box = document.getElementById("belt-box");
+  var stage = document.getElementById("belt-stage");
+  var cards = document.getElementById("belt-cards");
+  var eyes = document.getElementById("eyes");
+  var face = document.getElementById("face");
+  var nPushed = document.getElementById("n-pushed");
+  var nIn = document.getElementById("n-in");
+  var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  function fit() { stage.style.transform = "scale(" + box.clientWidth / 1000 + ")"; }
+  fit(); window.addEventListener("resize", fit);
+
+  var SLOP = ["Improve code quality ✨", "Refactor everything for readability", "Fix typo (adds 3 dependencies)", "Add AI-powered TODO resolver",
+    "Rewrite core in Rust", "Optimize imports", "Fix #1 (does not fix #1)", "Add comprehensive docstrings", "Modernize codebase",
+    "Add blockchain support", "Fix all the bugs", "Boost performance by 1000%", "Move utils into utils2", "Replace tests with vibes"];
+  var GOOD = ["Fix off-by-one in pager (+tests)", "Handle empty input in parse()", "Fix race in cache eviction (+test)"];
+  var Y = 140, CHECK = 427, pushed = 0, letIn = 0, si = 0, gi = 0;
+  function tr(x, y, r) { return "translate(" + x + "px," + y + "px) rotate(" + (r || 0) + "deg)"; }
+  function chip(title, num) {
+    var el = document.createElement("div");
+    el.className = "chip";
+    el.innerHTML = '<span class="n"></span><span class="tt"></span>';
+    el.querySelector(".n").textContent = "#" + num;
+    el.querySelector(".tt").textContent = title;
+    cards.appendChild(el);
+    return el;
+  }
+  function stampOn(el, good) {
+    var s = document.createElement("span");
+    s.className = "stamp " + (good ? "pass" : "bounce");
+    s.textContent = good ? "PASSED" : "BOUNCED";
+    el.appendChild(s);
+    if (!reduce) s.animate([{ opacity: 0, scale: 1.8 }, { opacity: 1, scale: 0.92, offset: 0.6 }, { opacity: 1, scale: 1 }], { duration: 260, easing: "cubic-bezier(.2,.9,.3,1.25)", fill: "forwards" });
+  }
+  var faceTimer;
+  function showFace(e) {
+    face.textContent = e; face.setAttribute("visibility", "visible"); eyes.setAttribute("visibility", "hidden");
+    clearTimeout(faceTimer);
+    faceTimer = setTimeout(function () { face.setAttribute("visibility", "hidden"); eyes.setAttribute("visibility", "visible"); }, 700);
+  }
+
+  if (reduce || !Element.prototype.animate) {
+    var a = chip(SLOP[0], 211); a.style.transform = tr(170, Y);
+    var b = chip(GOOD[0], 209); b.style.transform = tr(CHECK, Y); stampOn(b, true);
+    var c = chip(SLOP[4], 208); c.style.transform = tr(700, Y + 46, 14); c.style.opacity = 0.5; stampOn(c, false);
+    face.textContent = "👍"; face.setAttribute("visibility", "visible"); eyes.setAttribute("visibility", "hidden");
+    nPushed.textContent = "214"; nIn.textContent = "9";
+    return;
+  }
+  function wait(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
+  var queue = Promise.resolve();
+  function launch() {
+    pushed++; nPushed.textContent = pushed;
+    var good = pushed > 2 && pushed % 7 === 0;
+    var el = chip(good ? GOOD[gi++ % GOOD.length] : SLOP[si++ % SLOP.length], 100 + pushed);
+    var ride = el.animate([{ transform: tr(-170, Y), opacity: 0 }, { transform: tr(-40, Y), opacity: 1, offset: 0.2 }, { transform: tr(CHECK - 10, Y), opacity: 1 }], { duration: 2600, fill: "forwards" }).finished;
+    queue = Promise.all([queue, ride]).then(function () {
+      return el.animate([{ transform: tr(CHECK - 10, Y) }, { transform: tr(CHECK, Y) }], { duration: 120, fill: "forwards" }).finished;
+    }).then(function () { showFace(good ? "👍" : "✋"); return wait(260); })
+      .then(function () { stampOn(el, good); return wait(260); });
+    queue.then(function () {
+      if (good) {
+        letIn++; nIn.textContent = letIn;
+        return el.animate([{ transform: tr(CHECK, Y), opacity: 1 }, { transform: tr(880, Y), opacity: 1, offset: 0.8 }, { transform: tr(1010, Y), opacity: 0 }], { duration: 2200, fill: "forwards" }).finished.then(function () { el.remove(); });
+      }
+      return el.animate([{ transform: tr(CHECK, Y, 0), opacity: 1 }, { transform: tr(CHECK + 30, Y + 90, 16), opacity: 0 }], { duration: 700, easing: "cubic-bezier(.5,0,.8,.4)", fill: "forwards" }).finished.then(function () { el.remove(); });
+    });
+  }
+  var timer = null, onScreen = false;
+  function start() { if (!timer && onScreen && !document.hidden) { launch(); timer = setInterval(launch, 1150); } }
+  function stop() { clearInterval(timer); timer = null; }
+  new IntersectionObserver(function (es) { onScreen = es[0].isIntersecting; onScreen ? start() : stop(); }).observe(box);
+  document.addEventListener("visibilitychange", function () { document.hidden ? stop() : start(); });
+})();
 </script>
+<style>
+@media (prefers-reduced-motion: no-preference) {
+  .belt-dash { animation: belt 0.9s linear infinite; }
+}
+@keyframes belt { to { stroke-dashoffset: -24; } }
+</style>
 </body>
 </html>
