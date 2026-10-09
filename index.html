@@ -92,9 +92,8 @@ h1 {
 }
 .sub { margin: 0 auto; font-size: 1.3rem; font-weight: 400; font-variation-settings: normal; letter-spacing: 0; line-height: 1.5; color: var(--muted); max-width: 31em; text-wrap: balance; }
 .sub strong { color: var(--ink); font-weight: 650; }
-.facts { list-style: none; display: flex; flex-wrap: wrap; justify-content: center; gap: 10px 12px; margin: 30px 0 0; padding: 0; }
-.facts li { border: 1px solid var(--line); border-radius: 99px; padding: 6px 14px; font-size: 0.95rem; color: var(--ink); }
-.facts a { color: inherit; }
+.facts { list-style: none; display: flex; flex-wrap: wrap; justify-content: center; gap: 4px 0; margin: 22px 0 0; padding: 0; font-size: 0.95rem; color: var(--muted); }
+.facts li + li::before { content: "·"; margin: 0 10px; }
 .install-pill {
   display: inline-flex; align-items: center; gap: 10px;
   margin: 34px 0 0; padding: 12px 12px 12px 18px;
@@ -416,7 +415,7 @@ h3 { margin: 0 0 8px; font-size: 1.15rem; font-weight: 700; line-height: 1.3; }
         <li>No account</li>
         <li>No server</li>
         <li>No bill</li>
-        <li>Just <a href="https://github.com/gh-bouncer">two public repos</a></li>
+        <li>100% free</li>
       </ul>
       <div class="install-pill"><code><span class="p">$ </span>gh extension install gh-bouncer/gh-bouncer</code><button type="button" class="copybtn" data-copy="gh extension install gh-bouncer/gh-bouncer">Copy</button></div>
       <p class="then">Then run <code>gh bouncer init</code> in your repository.</p>
