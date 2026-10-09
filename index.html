@@ -281,9 +281,22 @@ h3 { margin: 0 0 8px; font-size: 1.15rem; font-weight: 700; line-height: 1.3; }
 .docs-intro { margin: -8px 0 40px; color: var(--muted); }
 #config h2 { scroll-margin-top: 24px; }
 .controls { min-width: 0; }
-.group { border: 0; margin: 0 0 44px; padding: 0; min-width: 0; }
-.group legend { padding: 0; font-size: 1.3rem; font-weight: 800; font-variation-settings: "wdth" 90; margin-bottom: 4px; }
-.group .lead { color: var(--muted); margin: 0 0 14px; }
+/* sections: one open at a time */
+.acc { border-top: 1px solid var(--line); }
+.acc:last-child { border-bottom: 1px solid var(--line); }
+.acc-head { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 20px; align-items: center; padding: 22px 0; cursor: pointer; }
+.acc-title { margin: 0; font-size: 1.2rem; font-weight: 800; font-variation-settings: "wdth" 90; line-height: 1.3; }
+.acc-count { display: inline-block; vertical-align: 2px; margin-left: 6px; padding: 1px 9px; border-radius: 99px; background: var(--paper-2); color: var(--muted); font-size: 0.76rem; font-weight: 600; font-variation-settings: normal; white-space: nowrap; }
+.acc-desc { margin: 4px 0 0; color: var(--muted); font-size: 0.95rem; }
+.acc-btn { font: inherit; font-size: 0.9rem; font-weight: 650; color: var(--ink); background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 7px 16px; cursor: pointer; min-width: 4.5rem; }
+.acc-btn:hover { border-color: #b4b9c8; }
+.acc.open .acc-btn { background: var(--ink); border-color: var(--ink); color: #fff; }
+.acc-body { display: grid; grid-template-rows: 0fr; transition: grid-template-rows 0.25s ease; }
+.acc.open .acc-body { grid-template-rows: 1fr; }
+.acc-inner { overflow: hidden; min-height: 0; border: 0; margin: 0; padding: 0; min-width: 0; }
+.acc.open .acc-inner { padding-bottom: 28px; }
+@media (prefers-reduced-motion: reduce) { .acc-body { transition: none; } }
+.cfg-tabs { display: none; }
 .field { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 4px 20px; align-items: center; padding: 14px 0; border-top: 1px solid var(--line); }
 .field > label, .field > .label { font-weight: 600; font-size: 0.98rem; }
 .field .hint { grid-column: 1 / -1; margin: 0; font-size: 0.86rem; color: var(--muted); }
@@ -379,6 +392,15 @@ h3 { margin: 0 0 8px; font-size: 1.15rem; font-weight: 700; line-height: 1.3; }
   .config { grid-template-columns: 1fr; }
   .config-left { grid-column: 1; padding: 72px 24px 40px; }
   .config-right { grid-column: 1; }
+  .cfg-tabs { display: flex; gap: 28px; position: sticky; top: 0; z-index: 2; background: var(--paper); border-bottom: 1px solid var(--line); margin: 0 0 8px; }
+  .cfg-tabs button { font: inherit; font-size: 0.95rem; font-weight: 650; color: var(--muted); background: none; border: 0; padding: 12px 0 10px; border-bottom: 2px solid transparent; margin-bottom: -1px; cursor: pointer; }
+  .cfg-tabs button[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--ink); }
+  .config[data-tab="output"] #builder, .config[data-tab="options"] .config-right { display: none; }
+  .config[data-tab="output"] .config-left { padding-bottom: 0; }
+  .config[data-tab="output"] .cfg-tabs { margin-bottom: 0; }
+  .config[data-tab="output"] #yaml { max-height: none; }
+  .cfg-tabs { margin-bottom: 0; }
+  .controls > .acc:first-child { border-top: 0; }
   .output { position: static; max-height: none; }
   #yaml { max-height: 70vh; }
   .foot-cta { grid-template-columns: minmax(0, 1fr); gap: 24px; }
@@ -624,15 +646,27 @@ gh bouncer https://github.com/acme/widget/pull/412</pre>
     </ul>
   </section>
 
-  <section class="config" id="config">
+  <section class="config" id="config" data-tab="options">
     <div class="config-left">
       <h2>Repo Config</h2>
       <p class="docs-intro">Everything lives in <code>.bouncer.yml</code> in your repository. Set it up here and copy the file. <code>gh bouncer init</code> starts you with these defaults, and contributors can't change any of it.</p>
-        <form class="controls" id="builder" autocomplete="off" onsubmit="return false">
+      <div class="cfg-tabs" role="tablist" aria-label="Repo Config">
+        <button type="button" role="tab" id="ctab-options" aria-selected="true" aria-controls="builder">Options</button>
+        <button type="button" role="tab" id="ctab-output" aria-selected="false" aria-controls="cfg-output" tabindex="-1">Output</button>
+      </div>
+        <form class="controls" id="builder" role="tabpanel" aria-labelledby="ctab-options" autocomplete="off" onsubmit="return false">
 
-          <fieldset class="group">
-            <legend>Review agent</legend>
-            <p class="lead">The model that reviews pull requests and how much work it does. Runs on the contributor's API key.</p>
+          <section class="acc" data-acc="review">
+            <div class="acc-head">
+              <div class="acc-titles">
+                <h3 class="acc-title" id="acc-review-t">Review agent <span class="acc-count"></span></h3>
+                <p class="acc-desc">The model that reviews pull requests and how much work it does. Runs on the contributor's API key.</p>
+              </div>
+              <button type="button" class="acc-btn" aria-expanded="false" aria-controls="acc-review">Edit</button>
+            </div>
+            <div class="acc-body" id="acc-review" role="region" aria-labelledby="acc-review-t">
+              <fieldset class="acc-inner">
+                <legend class="sr">Review agent</legend>
             <div class="field">
               <label for="f-model">Model</label>
               <select id="f-model">
@@ -657,11 +691,21 @@ gh bouncer https://github.com/acme/widget/pull/412</pre>
               <input type="number" id="f-turns" min="3" max="200" value="35" inputmode="numeric">
               <p class="hint">Tool calls before the agent must decide. Follows effort unless you change it.</p>
             </div>
-          </fieldset>
+              </fieldset>
+            </div>
+          </section>
 
-          <fieldset class="group">
-            <legend>Gate</legend>
-            <p class="lead">Deadlines, closing and exemptions. Label a pull request <code>bouncer:skip</code> to exempt it by hand.</p>
+          <section class="acc" data-acc="gate">
+            <div class="acc-head">
+              <div class="acc-titles">
+                <h3 class="acc-title" id="acc-gate-t">Gate <span class="acc-count"></span></h3>
+                <p class="acc-desc">Deadlines, closing and exemptions. Label a pull request <code>bouncer:skip</code> to exempt it by hand.</p>
+              </div>
+              <button type="button" class="acc-btn" aria-expanded="false" aria-controls="acc-gate">Edit</button>
+            </div>
+            <div class="acc-body" id="acc-gate" role="region" aria-labelledby="acc-gate-t">
+              <fieldset class="acc-inner">
+                <legend class="sr">Gate</legend>
             <div class="field">
               <label for="f-deadline">Review deadline (hours)</label>
               <input type="number" id="f-deadline" min="1" max="720" value="48" inputmode="numeric">
@@ -706,11 +750,21 @@ gh bouncer https://github.com/acme/widget/pull/412</pre>
               <input type="checkbox" role="switch" id="f-pin">
               <p class="hint">Only accept reviews made by the same bouncer version as the gate.</p>
             </div>
-          </fieldset>
+              </fieldset>
+            </div>
+          </section>
 
-          <fieldset class="group">
-            <legend>Pre-checks</legend>
-            <p class="lead">Checked in code before the agent runs.</p>
+          <section class="acc" data-acc="checks">
+            <div class="acc-head">
+              <div class="acc-titles">
+                <h3 class="acc-title" id="acc-checks-t">Pre-checks <span class="acc-count"></span></h3>
+                <p class="acc-desc">Checked in code before the agent runs.</p>
+              </div>
+              <button type="button" class="acc-btn" aria-expanded="false" aria-controls="acc-checks">Edit</button>
+            </div>
+            <div class="acc-body" id="acc-checks" role="region" aria-labelledby="acc-checks-t">
+              <fieldset class="acc-inner">
+                <legend class="sr">Pre-checks</legend>
             <div class="field">
               <label for="t-branches">Target branches</label>
               <div class="tags" data-list="branches"><input id="t-branches" placeholder="Add a branch like main, press Enter"></div>
@@ -735,26 +789,48 @@ gh bouncer https://github.com/acme/widget/pull/412</pre>
               <label for="t-paths">Forbidden paths</label>
               <div class="tags" data-list="paths"><input id="t-paths" placeholder="Add a glob like docs/**, press Enter"></div>
             </div>
-          </fieldset>
+              </fieldset>
+            </div>
+          </section>
 
-          <fieldset class="group">
-            <legend>Project guidance</legend>
-            <p class="lead">Context for the agent: what the project is for and what you never accept.</p>
+          <section class="acc" data-acc="guidance">
+            <div class="acc-head">
+              <div class="acc-titles">
+                <h3 class="acc-title" id="acc-guidance-t">Project guidance <span class="acc-count"></span></h3>
+                <p class="acc-desc">Context for the agent: what the project is for and what you never accept.</p>
+              </div>
+              <button type="button" class="acc-btn" aria-expanded="false" aria-controls="acc-guidance">Edit</button>
+            </div>
+            <div class="acc-body" id="acc-guidance" role="region" aria-labelledby="acc-guidance-t">
+              <fieldset class="acc-inner">
+                <legend class="sr">Project guidance</legend>
             <div class="field wide">
               <label class="sr" for="f-guidance">Guidance</label>
               <textarea id="f-guidance" rows="4" placeholder="Zero dependencies, one public function. New features need an issue first."></textarea>
             </div>
-          </fieldset>
+              </fieldset>
+            </div>
+          </section>
 
-          <fieldset class="group">
-            <legend>Agent Rules</legend>
-            <p class="lead">The agent checks every rule and cites file and line. A broken <strong>required</strong> rule fails the pull request. A broken <strong>advisory</strong> rule is only reported to you.</p>
+          <section class="acc" data-acc="rules">
+            <div class="acc-head">
+              <div class="acc-titles">
+                <h3 class="acc-title" id="acc-rules-t">Agent Rules <span class="acc-count"></span></h3>
+                <p class="acc-desc">The agent checks every rule and cites file and line. A broken <strong>required</strong> rule fails the pull request. A broken <strong>advisory</strong> rule is only reported to you.</p>
+              </div>
+              <button type="button" class="acc-btn" aria-expanded="false" aria-controls="acc-rules">Edit</button>
+            </div>
+            <div class="acc-body" id="acc-rules" role="region" aria-labelledby="acc-rules-t">
+              <fieldset class="acc-inner">
+                <legend class="sr">Agent Rules</legend>
             <ol class="rules" id="rules"></ol>
             <button type="button" class="add" id="add-rule">+ Add rule</button>
-          </fieldset>
+              </fieldset>
+            </div>
+          </section>
         </form>
     </div>
-    <div class="config-right">
+    <div class="config-right" id="cfg-output" role="tabpanel" aria-labelledby="ctab-output">
         <div class="output">
           <div class="out-head">
             <span>.bouncer.yml</span>
@@ -1121,6 +1197,64 @@ document.querySelectorAll(".copybtn").forEach(function (b) {
     navigator.clipboard.writeText(text).then(function () { b.textContent = "Copied"; setTimeout(function () { b.textContent = "Copy"; }, 1400); });
   });
 });
+
+// Repo Config: one section open at a time, and Options/Output tabs on small screens
+(function () {
+  var accs = Array.prototype.slice.call(document.querySelectorAll(".acc"));
+  function setOpen(acc, open) {
+    acc.classList.toggle("open", open);
+    var btn = acc.querySelector(".acc-btn"), body = acc.querySelector(".acc-body");
+    btn.setAttribute("aria-expanded", String(open));
+    btn.textContent = open ? "Done" : "Edit";
+    if (open) body.removeAttribute("inert"); else body.setAttribute("inert", "");
+  }
+  accs.forEach(function (acc) {
+    setOpen(acc, false);
+    acc.querySelector(".acc-head").addEventListener("click", function () {
+      var open = !acc.classList.contains("open");
+      accs.forEach(function (a) { if (a !== acc) setOpen(a, false); });
+      setOpen(acc, open);
+      if (open) {
+        // Closing the section above can move this one up; keep its header in view.
+        setTimeout(function () {
+          var top = acc.getBoundingClientRect().top;
+          if (top < 0 || top > window.innerHeight * 0.6) acc.scrollIntoView({ block: "start", behavior: "instant" });
+        }, 260);
+      }
+    });
+  });
+  function plural(n, one, many) { return n + " " + (n === 1 ? one : many); }
+  function counts() {
+    accs.forEach(function (acc) {
+      var c = acc.querySelector(".acc-count");
+      if (acc.dataset.acc === "rules") {
+        var n = document.querySelectorAll("#rules .rule-row").length;
+        c.textContent = n ? plural(n, "rule", "rules") : "Defaults";
+      } else {
+        c.textContent = plural(acc.querySelectorAll(".acc-body .field").length, "option", "options");
+      }
+    });
+  }
+  counts();
+  new MutationObserver(counts).observe(document.getElementById("rules"), { childList: true });
+
+  var config = document.getElementById("config");
+  var tabs = Array.prototype.slice.call(document.querySelectorAll(".cfg-tabs [role=tab]"));
+  function select(tab) {
+    tabs.forEach(function (t) {
+      var on = t === tab;
+      t.setAttribute("aria-selected", String(on));
+      t.tabIndex = on ? 0 : -1;
+    });
+    config.dataset.tab = tab.id === "ctab-output" ? "output" : "options";
+  }
+  tabs.forEach(function (t, i) {
+    t.addEventListener("click", function () { select(t); });
+    t.addEventListener("keydown", function (e) {
+      if (e.key === "ArrowRight" || e.key === "ArrowLeft") { var n = tabs[(i + 1) % 2]; select(n); n.focus(); }
+    });
+  });
+})();
 
 // scroll story
 (function () {
