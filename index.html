@@ -375,6 +375,10 @@ h3 { margin: 0 0 8px; font-size: 1.15rem; font-weight: 700; line-height: 1.3; }
   .top nav a:first-child { display: none; }
   .secure { padding: 72px 16px; }
   .checks { grid-template-columns: minmax(0, 1fr); }
+  .belt-box { aspect-ratio: 1000 / 280; }
+  .belt-stage { top: auto; bottom: 0; transform-origin: 0 100%; }
+  #head { transform: scale(1.5); transform-origin: 500px 130px; }
+  #head line, #head rect { stroke-width: 1.33; }
   .cmd { padding: 10px 10px 10px 14px; }
   .cmd pre { font-size: 0.8rem; }
   .copybtn, #copy { display: none; }
@@ -742,11 +746,14 @@ gh bouncer https://github.com/acme/widget/pull/412</pre>
           <svg viewBox="0 0 1000 230" width="1000" height="230" aria-hidden="true">
             <line x1="0" y1="184" x2="1000" y2="184" stroke="#30363d" stroke-width="2"/>
             <line class="belt-dash" x1="0" y1="184" x2="1000" y2="184" stroke="#9198a1" stroke-width="2" stroke-dasharray="2 22"/>
-            <line x1="500" y1="96" x2="500" y2="130" stroke="#30363d" stroke-width="2"/>
-            <rect x="452" y="14" width="96" height="82" rx="14" fill="#161b22" stroke="#30363d" stroke-width="2"/>
-            <rect x="462" y="24" width="76" height="62" rx="8" fill="#010409"/>
-            <g id="eyes" fill="#3fb950"><rect x="483" y="46" width="9" height="15" rx="2"/><rect x="508" y="46" width="9" height="15" rx="2"/></g>
-            <text id="face" x="500" y="69" text-anchor="middle" font-size="34" visibility="hidden">👍</text>
+            <g id="head">
+              <line x1="500" y1="96" x2="500" y2="130" stroke="#30363d" stroke-width="2"/>
+              <line x1="452" y1="130" x2="548" y2="130" stroke="#30363d" stroke-width="2"/>
+              <rect x="452" y="14" width="96" height="82" rx="14" fill="#161b22" stroke="#30363d" stroke-width="2"/>
+              <rect x="462" y="24" width="76" height="62" rx="8" fill="#010409"/>
+              <g id="eyes" fill="#3fb950"><rect x="483" y="46" width="9" height="15" rx="2"/><rect x="508" y="46" width="9" height="15" rx="2"/></g>
+              <text id="face" x="500" y="69" text-anchor="middle" font-size="34" visibility="hidden">👍</text>
+            </g>
           </svg>
           <div id="belt-cards"></div>
         </div>
