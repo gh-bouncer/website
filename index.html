@@ -1409,7 +1409,9 @@ document.querySelectorAll(".copybtn").forEach(function (b) {
     var good = pushed % 4 === 0;
     var el = chip(good ? GOOD[gi++ % GOOD.length] : SLOP[si++ % SLOP.length], 100 + pushed);
     var ride = el.animate([{ transform: tr(-170, Y), opacity: 0 }, { transform: tr(-40, Y), opacity: 1, offset: 0.2 }, { transform: tr(CHECK - 10, Y), opacity: 1 }], { duration: 2600, fill: "forwards" });
-    if (ahead) ride.currentTime = ahead;
+    // Jump ahead for the cards already on the belt when it first comes into view. Some
+    // browsers refuse to seek a brand-new animation; they just start from the beginning.
+    if (ahead) { try { ride.currentTime = ahead; } catch (e) {} }
     ride = ride.finished;
     queue = Promise.all([queue, ride]).then(function () {
       return el.animate([{ transform: tr(CHECK - 10, Y) }, { transform: tr(CHECK, Y) }], { duration: 120, fill: "forwards" }).finished;
@@ -1425,14 +1427,16 @@ document.querySelectorAll(".copybtn").forEach(function (b) {
   }
   var timer = null, onScreen = false;
   var primed = false;
+  function tick() { try { launch(); } catch (e) {} }
   function start() {
     if (timer || !onScreen || document.hidden) return;
+    timer = setInterval(tick, 1150);
     // First time in view, start with the belt already loaded.
-    if (!primed) { primed = true; launch(2300); launch(1150); }
-    launch(); timer = setInterval(function () { launch(); }, 1150);
+    if (!primed) { primed = true; try { launch(2300); launch(1150); } catch (e) {} }
+    tick();
   }
   function stop() { clearInterval(timer); timer = null; }
-  new IntersectionObserver(function (es) { onScreen = es[0].isIntersecting; onScreen ? start() : stop(); }, { rootMargin: "120px 0px" }).observe(box);
+  new IntersectionObserver(function (es) { onScreen = es[es.length - 1].isIntersecting; onScreen ? start() : stop(); }, { rootMargin: "120px 0px" }).observe(box);
   document.addEventListener("visibilitychange", function () { document.hidden ? stop() : start(); });
 })();
 </script>
