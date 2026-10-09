@@ -737,7 +737,7 @@ gh bouncer https://github.com/acme/widget/pull/412</pre>
 <span class="p">$ </span>gh bouncer init</pre><button type="button" class="copybtn" data-copy="gh extension install gh-bouncer/gh-bouncer&#10;gh bouncer init">Copy</button></div>
     </div>
 
-    <figure class="belt" aria-label="Animation: pull requests ride a conveyor belt past a screen. It shows a raised hand for most of them, and they're stamped BOUNCED and dropped. Now and then it shows a thumbs up, and the pull request is stamped PASSED and rolls on.">
+    <figure class="belt" aria-label="Animation: pull requests ride a conveyor belt past a screen. It shows a raised hand for most of them, and they're stamped BOUNCED and dropped. Every fourth one gets a thumbs up, and that pull request is stamped PASSED and rolls on.">
       <div class="belt-box" id="belt-box">
         <div class="belt-stage" id="belt-stage">
           <svg viewBox="0 0 1000 230" width="1000" height="230" aria-hidden="true">
@@ -1217,16 +1217,18 @@ document.querySelectorAll(".copybtn").forEach(function (b) {
     var b = chip(GOOD[0], 209); b.style.transform = tr(CHECK, Y); stampOn(b, true);
     var c = chip(SLOP[4], 208); c.style.transform = tr(700, Y + 46, 14); c.style.opacity = 0.5; stampOn(c, false);
     face.textContent = "👍"; face.setAttribute("visibility", "visible"); eyes.setAttribute("visibility", "hidden");
-    nPushed.textContent = "214"; nIn.textContent = "9";
+    nPushed.textContent = "216"; nIn.textContent = "54";
     return;
   }
   function wait(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
   var queue = Promise.resolve();
-  function launch() {
+  function launch(ahead) {
     pushed++; nPushed.textContent = pushed;
-    var good = pushed > 2 && pushed % 7 === 0;
+    var good = pushed % 4 === 0;
     var el = chip(good ? GOOD[gi++ % GOOD.length] : SLOP[si++ % SLOP.length], 100 + pushed);
-    var ride = el.animate([{ transform: tr(-170, Y), opacity: 0 }, { transform: tr(-40, Y), opacity: 1, offset: 0.2 }, { transform: tr(CHECK - 10, Y), opacity: 1 }], { duration: 2600, fill: "forwards" }).finished;
+    var ride = el.animate([{ transform: tr(-170, Y), opacity: 0 }, { transform: tr(-40, Y), opacity: 1, offset: 0.2 }, { transform: tr(CHECK - 10, Y), opacity: 1 }], { duration: 2600, fill: "forwards" });
+    if (ahead) ride.currentTime = ahead;
+    ride = ride.finished;
     queue = Promise.all([queue, ride]).then(function () {
       return el.animate([{ transform: tr(CHECK - 10, Y) }, { transform: tr(CHECK, Y) }], { duration: 120, fill: "forwards" }).finished;
     }).then(function () { showFace(good ? "👍" : "✋"); return wait(260); })
@@ -1240,9 +1242,15 @@ document.querySelectorAll(".copybtn").forEach(function (b) {
     });
   }
   var timer = null, onScreen = false;
-  function start() { if (!timer && onScreen && !document.hidden) { launch(); timer = setInterval(launch, 1150); } }
+  var primed = false;
+  function start() {
+    if (timer || !onScreen || document.hidden) return;
+    // First time in view, start with the belt already loaded.
+    if (!primed) { primed = true; launch(2300); launch(1150); }
+    launch(); timer = setInterval(function () { launch(); }, 1150);
+  }
   function stop() { clearInterval(timer); timer = null; }
-  new IntersectionObserver(function (es) { onScreen = es[0].isIntersecting; onScreen ? start() : stop(); }).observe(box);
+  new IntersectionObserver(function (es) { onScreen = es[0].isIntersecting; onScreen ? start() : stop(); }, { rootMargin: "120px 0px" }).observe(box);
   document.addEventListener("visibilitychange", function () { document.hidden ? stop() : start(); });
 })();
 </script>
