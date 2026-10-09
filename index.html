@@ -74,6 +74,7 @@ h1 {
 .stage { position: absolute; left: 0; top: 0; width: 1000px; height: 420px; transform-origin: 0 0; }
 .stage svg.scenery { position: absolute; inset: 0; width: 1000px; height: 420px; overflow: visible; }
 .cards { position: absolute; inset: 0; }
+.goo { position: absolute; left: 186px; top: 292px; width: 180px; height: 112px; pointer-events: none; }
 .tally { margin: 6px 0 0; font-size: 0.98rem; color: var(--muted); font-variant-numeric: tabular-nums; }
 .tally strong { color: var(--ink); font-weight: 750; }
 .tally .in { color: var(--pass); }
@@ -385,6 +386,7 @@ footer nav a { margin-right: 22px; }
                 </g>
               </g>
             </svg>
+            <canvas class="goo" id="goo" aria-hidden="true"></canvas>
             <div class="cards" id="cards"></div>
           </div>
         </div>
@@ -659,6 +661,20 @@ footer nav a { margin-right: 22px; }
     if (es[0].isIntersecting) { list.classList.add("seen"); o.disconnect(); }
   }, { threshold: 0.4 }).observe(list);
 })();
+</script>
+<script type="module">
+// Slime from the machine's chute. WebGPU only; without it the canvas just stays empty.
+if (navigator.gpu && !matchMedia("(prefers-reduced-motion: reduce)").matches) {
+  try {
+    const { createShader } = await import("/vendor/shaders.min.js");
+    await createShader(document.getElementById("goo"), {
+      components: [{ type: "Goo", props: {
+        gooColor: "#7ccf3c", containment: 0.15, spread: 1.6, blobScale: 0.32, merge: 0.8,
+        threshold: 0.45, speed: 0.6, wobble: 0.6, breathe: 0.35, scale: 1.3, wetness: 2.4
+      } }]
+    }, { disableTelemetry: true, onError: () => {} });
+  } catch (e) { /* decorative only */ }
+}
 </script>
 </body>
 </html>
