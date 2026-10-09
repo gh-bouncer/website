@@ -68,7 +68,7 @@ body {
 }
 a { color: inherit; text-decoration-thickness: 1px; text-underline-offset: 0.18em; }
 a:hover { color: var(--pass); }
-:focus-visible { outline: 3px solid var(--pass); outline-offset: 3px; border-radius: 2px; }
+:focus-visible { outline: 2px solid var(--pass); outline-offset: 2px; border-radius: 2px; }
 code, pre { font-family: "JetBrains Mono", ui-monospace, monospace; }
 p code, h3 code, li code { font-size: 0.86em; background: var(--paper-2); padding: 0.1em 0.35em; border-radius: 4px; }
 
@@ -77,10 +77,10 @@ p code, h3 code, li code { font-size: 0.86em; background: var(--paper-2); paddin
 
 /* --- masthead --- */
 .top { display: flex; justify-content: space-between; align-items: center; padding: 22px 0; }
-.brand { font-weight: 800; font-variation-settings: "wdth" 115; font-size: 1.05rem; text-decoration: none; letter-spacing: -0.01em; }
+.brand { white-space: nowrap; font-weight: 800; font-variation-settings: "wdth" 115; font-size: 1.05rem; text-decoration: none; letter-spacing: -0.01em; }
 .top nav a { margin-left: 22px; font-size: 0.95rem; color: var(--muted); text-decoration: none; }
 .top nav a:hover { color: var(--ink); }
-.hero { text-align: center; padding: 72px 0 104px; }
+.hero { text-align: center; padding: 56px 0 96px; }
 h1 {
   margin: 0;
   font-size: clamp(2.6rem, 8.6vw, 6.6rem);
@@ -90,7 +90,7 @@ h1 {
   letter-spacing: -0.015em;
   text-wrap: balance;
 }
-.sub { margin: 22px auto 0; font-size: 1.3rem; line-height: 1.5; color: var(--muted); max-width: 31em; text-wrap: balance; }
+.sub { margin: 0 auto; font-size: 1.3rem; font-weight: 400; font-variation-settings: normal; letter-spacing: 0; line-height: 1.5; color: var(--muted); max-width: 31em; text-wrap: balance; }
 .sub strong { color: var(--ink); font-weight: 650; }
 .facts { list-style: none; display: flex; flex-wrap: wrap; justify-content: center; gap: 10px 12px; margin: 30px 0 0; padding: 0; }
 .facts li { border: 1px solid var(--line); border-radius: 99px; padding: 6px 14px; font-size: 0.95rem; color: var(--ink); }
@@ -246,9 +246,13 @@ h2 {
 /* --- can't be faked --- */
 section.block { padding: 96px 0; border-top: 1px solid var(--line); }
 h3 { margin: 0 0 8px; font-size: 1.15rem; font-weight: 700; line-height: 1.3; }
-.checks { list-style: none; margin: 32px 0 0; padding: 0; display: grid; grid-template-columns: repeat(2, 1fr); gap: 28px 48px; }
-.checks li { padding-left: 18px; border-left: 3px solid var(--bounce); }
-.checks p { margin: 0; color: var(--muted); }
+.secure { padding: 96px 24px; border-top: 1px solid var(--line); }
+.secure h2 { text-align: center; margin-bottom: 36px; }
+.checks { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; }
+.checks li { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 24px 24px 26px; }
+.checks svg { display: block; width: 22px; height: 22px; color: var(--pass); margin-bottom: 18px; }
+.checks h3 { font-size: 1.1rem; margin-bottom: 6px; }
+.checks p { margin: 0; color: var(--muted); font-size: 0.98rem; line-height: 1.5; }
 
 /* --- config: form on the content edge, file to the window edge --- */
 .config {
@@ -271,19 +275,19 @@ h3 { margin: 0 0 8px; font-size: 1.15rem; font-weight: 700; line-height: 1.3; }
 .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 .field input[type=number], .field select { font: inherit; font-size: 0.95rem; color: var(--ink); background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 7px 10px; width: 9.5rem; }
 .field select { width: auto; min-width: 12rem; }
-.field input:focus-visible, .field select:focus-visible, .field textarea:focus-visible, .tags:focus-within { outline: 3px solid var(--pass); outline-offset: 1px; }
+.field input:focus-visible, .field select:focus-visible, .field textarea:focus-visible, .tags:focus-within, .rule-row input:focus-visible, .rule-row textarea:focus-visible { outline: none; border-color: var(--pass); box-shadow: 0 0 0 3px rgba(47, 69, 217, 0.14); }
 .seg { display: inline-flex; flex-wrap: wrap; border: 1px solid var(--line); border-radius: 9px; overflow: hidden; background: var(--surface); }
 .seg label { position: relative; }
 .seg input { position: absolute; opacity: 0; inset: 0; margin: 0; cursor: pointer; }
 .seg span { display: block; padding: 7px 12px; font-size: 0.9rem; font-weight: 600; color: var(--muted); border-left: 1px solid var(--line); }
 .seg label:first-child span { border-left: 0; }
 .seg input:checked + span { background: var(--ink); color: #fff; }
-.seg input:focus-visible + span { outline: 3px solid var(--pass); outline-offset: -3px; }
+.seg input:focus-visible + span { outline: 2px solid var(--pass); outline-offset: -2px; }
 .toggle input[type=checkbox] { appearance: none; -webkit-appearance: none; width: 44px; height: 26px; margin: 0; border-radius: 99px; background: #c4c8d4; position: relative; cursor: pointer; transition: background 0.15s; }
 .toggle input[type=checkbox]::after { content: ""; position: absolute; top: 3px; left: 3px; width: 20px; height: 20px; border-radius: 50%; background: #fff; box-shadow: 0 1px 2px rgba(0,0,0,.25); transition: translate 0.15s; }
 .toggle input[type=checkbox]:checked { background: var(--pass); }
 .toggle input[type=checkbox]:checked::after { translate: 18px 0; }
-.toggle input[type=checkbox]:focus-visible { outline: 3px solid var(--pass); outline-offset: 2px; }
+.toggle input[type=checkbox]:focus-visible { outline: 2px solid var(--pass); outline-offset: 2px; }
 .range { display: flex; align-items: center; gap: 10px; }
 .range input { width: 9rem; accent-color: var(--pass); }
 .range output { font-variant-numeric: tabular-nums; font-weight: 700; width: 3em; text-align: right; }
@@ -293,21 +297,20 @@ h3 { margin: 0 0 8px; font-size: 1.15rem; font-weight: 700; line-height: 1.3; }
 .tags .tag-chip button:hover { color: var(--bounce); }
 .tags input { flex: 1; min-width: 12rem; border: 0; outline: 0; background: transparent; font: inherit; font-size: 0.92rem; color: var(--ink); padding: 3px 4px; }
 .field textarea { width: 100%; font: inherit; font-size: 0.95rem; line-height: 1.5; color: var(--ink); background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; resize: vertical; }
-.rules { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--line); }
-.rule-row { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: 8px 12px; align-items: start; padding: 14px 0; border-bottom: 1px solid var(--line); }
-.rule-row textarea { width: 100%; font: inherit; font-size: 0.95rem; line-height: 1.45; font-weight: 500; color: var(--ink); background: transparent; border: 1px solid transparent; border-radius: 8px; padding: 6px 8px; margin: -6px 0 0 -8px; resize: none; field-sizing: content; min-height: 2.6em; }
-.rule-row textarea:hover { border-color: var(--line); }
-.rule-row textarea:focus { background: var(--surface); border-color: var(--line); outline: 3px solid var(--pass); outline-offset: 1px; }
-.rule-row .mini { display: inline-flex; border: 1px solid var(--line); border-radius: 99px; overflow: hidden; background: var(--surface); }
-.rule-row .mini button { border: 0; background: none; font: inherit; font-size: 0.8rem; font-weight: 700; padding: 4px 10px; color: var(--muted); cursor: pointer; }
-.rule-row .mini button[aria-pressed=true].hard { background: #fbe7ea; color: var(--bounce); }
-.rule-row .mini button[aria-pressed=true].soft { background: var(--paper-2); color: var(--ink); }
-.rule-row .del { border: 0; background: none; color: var(--muted); font-size: 1.25rem; line-height: 1; padding: 2px 6px; cursor: pointer; border-radius: 6px; }
-.rule-row .del:hover { color: var(--bounce); background: #fbe7ea; }
-.rule-row .id { grid-column: 1 / -1; display: flex; align-items: center; gap: 6px; font-size: 0.8rem; color: var(--muted); }
-.rule-row .id input { font-family: "JetBrains Mono", ui-monospace, monospace; font-size: 0.8rem; color: var(--muted); background: transparent; border: 1px solid transparent; border-radius: 6px; padding: 1px 6px; width: 22rem; max-width: 100%; }
-.rule-row .id input:hover, .rule-row .id input:focus { border-color: var(--line); color: var(--ink); }
-.add { margin-top: 14px; font: inherit; font-weight: 650; font-size: 0.95rem; color: var(--ink); background: var(--surface); border: 1px dashed #9aa0b3; border-radius: 8px; padding: 9px 14px; cursor: pointer; }
+.rules { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
+.rule-row { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px 14px; }
+.rule-top { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin-bottom: 10px; }
+.rule-row .id { display: flex; align-items: center; gap: 8px; flex: 1 1 14rem; min-width: 0; font-size: 0.82rem; font-weight: 600; color: var(--muted); }
+.rule-row .id input { flex: 1; min-width: 0; font-family: "JetBrains Mono", ui-monospace, monospace; font-size: 0.82rem; color: var(--ink); background: var(--paper); border: 1px solid var(--line); border-radius: 6px; padding: 5px 8px; }
+.rule-row .mini { display: inline-flex; border: 1px solid var(--line); border-radius: 7px; overflow: hidden; }
+.rule-row .mini button { border: 0; background: var(--surface); font: inherit; font-size: 0.82rem; font-weight: 650; padding: 5px 11px; color: var(--muted); cursor: pointer; }
+.rule-row .mini button + button { border-left: 1px solid var(--line); }
+.rule-row .mini button[aria-pressed=true] { background: var(--ink); color: #fff; }
+.rule-row .del { border: 1px solid transparent; background: none; color: var(--muted); font: inherit; font-size: 0.82rem; font-weight: 600; padding: 5px 8px; cursor: pointer; border-radius: 6px; }
+.rule-row .del:hover { color: var(--bounce); border-color: var(--line); }
+.rule-row textarea { display: block; width: 100%; font: inherit; font-size: 0.95rem; line-height: 1.5; color: var(--ink); background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 9px 11px; resize: vertical; field-sizing: content; min-height: 3.4em; }
+.rule-row textarea:hover, .rule-row .id input:hover { border-color: #b4b9c8; }
+.add { margin-top: 12px; font: inherit; font-weight: 650; font-size: 0.95rem; color: var(--ink); background: transparent; border: 1px dashed #9aa0b3; border-radius: 8px; padding: 9px 14px; cursor: pointer; }
 .add:hover { border-style: solid; }
 .add:disabled { opacity: 0.5; cursor: not-allowed; }
 
@@ -362,7 +365,7 @@ h3 { margin: 0 0 8px; font-size: 1.15rem; font-weight: 700; line-height: 1.3; }
   .output { position: static; max-height: none; }
   #yaml { max-height: 70vh; }
   .foot-cta { grid-template-columns: minmax(0, 1fr); gap: 24px; }
-  .checks { grid-template-columns: 1fr; }
+  .checks { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 @media (max-width: 640px) {
   .run { grid-template-columns: 1fr; }
@@ -370,6 +373,9 @@ h3 { margin: 0 0 8px; font-size: 1.15rem; font-weight: 700; line-height: 1.3; }
   .hero { padding: 40px 0 72px; }
   .sub { font-size: 1.12rem; }
   .install-pill { font-size: 0.8rem; padding: 10px 10px 10px 14px; }
+  .top nav a:first-child { display: none; }
+  .secure { padding: 72px 16px; }
+  .checks { grid-template-columns: minmax(0, 1fr); }
   .cmd { padding: 10px 10px 10px 14px; }
   .cmd pre { font-size: 0.8rem; }
   .copybtn, #copy { display: none; }
@@ -383,13 +389,10 @@ h3 { margin: 0 0 8px; font-size: 1.15rem; font-weight: 700; line-height: 1.3; }
   .field input[type=number], .field select { width: 100%; }
   .seg { display: grid; grid-template-columns: repeat(3, 1fr); }
   .seg span { text-align: center; border-left: 0; border-top: 1px solid var(--line); }
-  .rule-row { grid-template-columns: minmax(0, 1fr) auto; }
-  .rule-row .mini { grid-column: 1; justify-self: start; }
-  .rule-row .del { grid-row: 1; grid-column: 2; }
   .out-head { flex-wrap: wrap; }
   .mock .body { padding: 14px; }
   .pr-title { font-size: 18px; }
-  .top nav a { margin-left: 14px; }
+  .top nav a { margin-left: 16px; }
 }
 </style>
 </head>
@@ -402,13 +405,13 @@ h3 { margin: 0 0 8px; font-size: 1.15rem; font-weight: 700; line-height: 1.3; }
       <a class="brand" href="/">gh bouncer</a>
       <nav>
         <a href="#how">How it works</a>
-        <a href="#config">Config</a>
-        <a href="https://github.com/gh-bouncer/gh-bouncer">GitHub</a>
+        <a href="#config">Repo Config</a>
+        <a href="https://github.com/gh-bouncer/action">Action</a>
+        <a href="https://github.com/gh-bouncer/gh-bouncer">Extension</a>
       </nav>
     </div>
     <div class="hero">
-      <h1>PRs pay their own cover.</h1>
-      <p class="sub">Outside pull requests are reviewed by <strong>the contributor's own AI, in their own GitHub Actions</strong>, before they ever reach you.</p>
+      <h1 class="sub">Outside pull requests are reviewed by <strong>the contributor's own AI, in their own GitHub Actions</strong>, before they ever reach you.</h1>
       <ul class="facts">
         <li>No account</li>
         <li>No server</li>
@@ -571,27 +574,25 @@ gh bouncer https://github.com/acme/widget/pull/412</pre>
     </div>
   </section>
 
-  <section class="block">
-    <div class="wrap">
-      <h2>A pass can't be faked</h2>
-      <ul class="checks">
-        <li><h3>Signed by GitHub</h3><p>Every review is signed by GitHub as the output of the bouncer's own workflow. Edit the workflow, or run it anywhere but GitHub's runners, and the signature no longer matches.</p></li>
-        <li><h3>Your settings, not theirs</h3><p>The model, effort and rules come from your repository. The contributor supplies a key and nothing else.</p></li>
-        <li><h3>First review counts</h3><p>Every review of the same commit is recorded, and only the earliest one counts. Re-rolling until the model says yes doesn't work.</p></li>
-        <li><h3>Untrusted text stays data</h3><p>Instructions hidden in a pull request aimed at the reviewer are flagged and fail it. The final call is made in code, from verified evidence.</p></li>
-      </ul>
-    </div>
-    </section>
+  <section class="secure">
+    <h2>A pass can't be faked</h2>
+    <ul class="checks">
+      <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg><h3>Signed by GitHub</h3><p>Each review is signed as the output of bouncer's own workflow. Edit it and the signature breaks.</p></li>
+      <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg><h3>Your settings</h3><p>Model, effort and rules come from your repository. The contributor only brings a key.</p></li>
+      <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg><h3>First review counts</h3><p>Only the earliest review of a commit counts. No re-rolling for a yes.</p></li>
+      <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg><h3>Injection fails</h3><p>Instructions aimed at the reviewer fail the pull request. The verdict is made in code.</p></li>
+    </ul>
+  </section>
 
   <section class="config" id="config">
     <div class="config-left">
-      <h2>Config</h2>
+      <h2>Repo Config</h2>
       <p class="docs-intro">Everything lives in <code>.bouncer.yml</code> in your repository. Set it up here and copy the file. <code>gh bouncer init</code> starts you with these defaults, and contributors can't change any of it.</p>
         <form class="controls" id="builder" autocomplete="off" onsubmit="return false">
 
           <fieldset class="group">
-            <legend>The review</legend>
-            <p class="lead">How thorough it is. The contributor pays for it.</p>
+            <legend>Review agent</legend>
+            <p class="lead">The model that reviews pull requests and how much work it does. Runs on the contributor's API key.</p>
             <div class="field">
               <label for="f-model">Model</label>
               <select id="f-model">
@@ -601,7 +602,7 @@ gh bouncer https://github.com/acme/widget/pull/412</pre>
               </select>
             </div>
             <div class="field">
-              <span class="label" id="l-effort">Thoroughness</span>
+              <span class="label" id="l-effort">Effort</span>
               <div class="seg" role="radiogroup" aria-labelledby="l-effort">
                 <label><input type="radio" name="effort" value="low"><span>Low</span></label>
                 <label><input type="radio" name="effort" value="medium"><span>Medium</span></label>
@@ -609,87 +610,91 @@ gh bouncer https://github.com/acme/widget/pull/412</pre>
                 <label><input type="radio" name="effort" value="xhigh"><span>Extra high</span></label>
                 <label><input type="radio" name="effort" value="max"><span>Max</span></label>
               </div>
-              <p class="hint">Higher reads more of your code and costs the contributor more.</p>
+              <p class="hint">Higher effort reads more of your code and costs the contributor more.</p>
             </div>
             <div class="field">
-              <label for="f-turns">Steps before it has to decide</label>
+              <label for="f-turns">Max turns</label>
               <input type="number" id="f-turns" min="3" max="200" value="35" inputmode="numeric">
-              <p class="hint">Follows thoroughness unless you change it.</p>
+              <p class="hint">Tool calls before the agent must decide. Follows effort unless you change it.</p>
             </div>
           </fieldset>
 
           <fieldset class="group">
-            <legend>At the door</legend>
-            <p class="lead">Deadlines, retries and who skips the line. You can also label any pull request <code>bouncer:skip</code> to wave it through.</p>
+            <legend>Gate</legend>
+            <p class="lead">Deadlines, closing and exemptions. Label a pull request <code>bouncer:skip</code> to exempt it by hand.</p>
             <div class="field">
-              <label for="f-deadline">Hours to send a review</label>
+              <label for="f-deadline">Review deadline (hours)</label>
               <input type="number" id="f-deadline" min="1" max="720" value="48" inputmode="numeric">
-              <p class="hint">After that, the pull request is closed.</p>
+              <p class="hint">Pull requests without a review by then are closed.</p>
             </div>
             <div class="field">
-              <label for="f-attempts">Tries before it's closed for good</label>
+              <label for="f-attempts">Max review attempts</label>
               <input type="number" id="f-attempts" min="1" max="20" value="3" inputmode="numeric">
+              <p class="hint">Reviews allowed per pull request before it is closed for good.</p>
             </div>
             <div class="field toggle">
-              <label for="f-close">Close bounced pull requests</label>
+              <label for="f-close">Close failed pull requests</label>
               <input type="checkbox" role="switch" id="f-close" checked>
-              <p class="hint">Off labels them <code>bouncer:fail</code> and leaves them open. Good for a trial run.</p>
+              <p class="hint">When off, failed pull requests are labeled <code>bouncer:fail</code> and left open.</p>
             </div>
             <div class="field">
-              <label for="f-conf">Confidence needed to bounce</label>
+              <label for="f-conf">Fail confidence</label>
               <div class="range"><input type="range" id="f-conf" min="0.5" max="1" step="0.05" value="0.8"><output id="o-conf" for="f-conf">80%</output></div>
-              <p class="hint">A rule that can close only does so when the reviewer is at least this sure.</p>
+              <p class="hint">A broken required rule fails the pull request only when the agent is at least this confident.</p>
             </div>
             <div class="field toggle">
-              <label for="f-rereview">Review new commits after a pass</label>
+              <label for="f-rereview">Re-review after a pass</label>
               <input type="checkbox" role="switch" id="f-rereview" checked>
+              <p class="hint">New commits pushed after a pass need a new review.</p>
             </div>
             <div class="field toggle">
-              <label for="f-maint">Maintainers walk straight in</label>
+              <label for="f-maint">Exempt maintainers</label>
               <input type="checkbox" role="switch" id="f-maint" checked>
               <p class="hint">Owners, members and collaborators.</p>
             </div>
             <div class="field toggle">
-              <label for="f-prior">Past contributors walk straight in</label>
+              <label for="f-prior">Exempt past contributors</label>
               <input type="checkbox" role="switch" id="f-prior" checked>
+              <p class="hint">Authors who already have a merged pull request here.</p>
             </div>
             <div class="field">
-              <label for="t-users">Accounts that always walk in</label>
+              <label for="t-users">Exempt accounts</label>
               <div class="tags" data-list="users"><input id="t-users" placeholder="Add an account, press Enter"></div>
             </div>
             <div class="field toggle">
-              <label for="f-pin">Only accept reviews from this exact bouncer version</label>
+              <label for="f-pin">Pin to gate version</label>
               <input type="checkbox" role="switch" id="f-pin">
+              <p class="hint">Only accept reviews made by the same bouncer version as the gate.</p>
             </div>
           </fieldset>
 
           <fieldset class="group">
-            <legend>Instant checks</legend>
-            <p class="lead">Checked in code before any AI is involved.</p>
+            <legend>Pre-checks</legend>
+            <p class="lead">Checked in code before the agent runs.</p>
             <div class="field toggle">
-              <label for="f-issue">Must link an open issue</label>
+              <label for="f-issue">Require a linked issue</label>
               <input type="checkbox" role="switch" id="f-issue" checked>
               <p class="hint">For example <code>Fixes #123</code> in the description.</p>
             </div>
             <div class="field">
-              <label for="f-lines">Most lines a pull request can change</label>
+              <label for="f-lines">Max changed lines</label>
               <input type="number" id="f-lines" min="0" value="0" inputmode="numeric">
               <p class="hint">0 means no limit.</p>
             </div>
             <div class="field">
-              <label for="f-prs">Most pull requests the author opened in the last day</label>
+              <label for="f-prs">Max pull requests per author in 24 hours</label>
               <input type="number" id="f-prs" min="0" value="0" inputmode="numeric">
               <p class="hint">Counted across all of GitHub. 0 means no limit.</p>
             </div>
             <div class="field">
-              <label for="t-paths">Paths outsiders can't touch</label>
-              <div class="tags" data-list="paths"><input id="t-paths" placeholder="Add a path like docs/**, press Enter"></div>
+              <label for="t-paths">Forbidden paths</label>
+              <div class="tags" data-list="paths"><input id="t-paths" placeholder="Add a glob like docs/**, press Enter"></div>
             </div>
           </fieldset>
 
           <fieldset class="group">
-            <legend>What your project is about</legend>
-            <p class="lead">Plain-language notes for the reviewer: what the project is for and what you never accept. Nothing sharpens verdicts more.</p>
+            <legend>Project guidance</legend>
+            <p class="lead">Context for the agent: what the project is for and what you never accept.</p>
             <div class="field wide">
               <label class="sr" for="f-guidance">Guidance</label>
               <textarea id="f-guidance" rows="4" placeholder="Zero dependencies, one public function. New features need an issue first."></textarea>
@@ -697,10 +702,10 @@ gh bouncer https://github.com/acme/widget/pull/412</pre>
           </fieldset>
 
           <fieldset class="group">
-            <legend>Rules</legend>
-            <p class="lead">What the reviewer judges, citing file and line. Rules that can close a pull request bounce it; notes are passed on to you.</p>
+            <legend>Agent Rules</legend>
+            <p class="lead">The agent checks every rule and cites file and line. A broken <strong>required</strong> rule fails the pull request. A broken <strong>advisory</strong> rule is only reported to you.</p>
             <ol class="rules" id="rules"></ol>
-            <button type="button" class="add" id="add-rule">Add a rule</button>
+            <button type="button" class="add" id="add-rule">+ Add rule</button>
           </fieldset>
         </form>
     </div>
@@ -725,7 +730,7 @@ gh bouncer https://github.com/acme/widget/pull/412</pre>
   <div class="wrap">
     <div class="foot-cta">
       <div>
-        <h2>Maintainers, need a bouncer?</h2>
+        <h2>Need a bouncer?</h2>
         <p>Install the extension and run <code>init</code>. It opens a pull request with one workflow file and your <code>.bouncer.yml</code>.</p>
       </div>
       <div class="cmd"><pre><span class="p">$ </span>gh extension install gh-bouncer/gh-bouncer
@@ -957,44 +962,50 @@ gh bouncer https://github.com/acme/widget/pull/412</pre>
       var li = document.createElement("li");
       li.className = "rule-row";
 
-      var ta = document.createElement("textarea");
-      ta.rows = 2;
-      ta.value = r.description;
-      ta.placeholder = "Describe what a good pull request does, in plain language";
-      ta.setAttribute("aria-label", "Rule " + (i + 1));
-      ta.oninput = function () {
-        if (r.autoId) { r.id = slug(ta.value).split("-").slice(0, 4).join("-"); idIn.value = r.id; }
-        r.description = ta.value; render();
-      };
+      var top = document.createElement("div");
+      top.className = "rule-top";
+
+      var idWrap = document.createElement("label");
+      idWrap.className = "id";
+      idWrap.textContent = "ID";
+      var idIn = document.createElement("input");
+      idIn.value = r.id;
+      idIn.spellcheck = false;
+      idIn.placeholder = "rule-id";
+      idIn.oninput = function () { r.id = idIn.value; r.autoId = false; render(); };
+      idIn.onblur = function () { r.id = slug(idIn.value) || r.id; idIn.value = r.id; render(); };
+      idWrap.appendChild(idIn);
 
       var mini = document.createElement("div");
       mini.className = "mini";
       mini.setAttribute("role", "group");
-      mini.setAttribute("aria-label", "What happens when this rule fails");
-      [["hard", "Can close", true], ["soft", "Note", false]].forEach(function (o) {
+      mini.setAttribute("aria-label", "Rule " + (i + 1) + " type");
+      [["hard", "Required", true], ["soft", "Advisory", false]].forEach(function (o) {
         var b = document.createElement("button");
         b.type = "button"; b.className = o[0]; b.textContent = o[1];
+        b.title = o[2] ? "Breaking this rule fails the pull request" : "Breaking this rule is only reported";
         b.setAttribute("aria-pressed", String(r.hard === o[2]));
         b.onclick = function () { r.hard = o[2]; renderRules(); render(); };
         mini.appendChild(b);
       });
 
       var del = document.createElement("button");
-      del.type = "button"; del.className = "del"; del.textContent = "×";
+      del.type = "button"; del.className = "del"; del.textContent = "Remove";
       del.setAttribute("aria-label", "Remove rule " + (i + 1));
       del.onclick = function () { rules.splice(i, 1); renderRules(); render(); };
 
-      var idWrap = document.createElement("label");
-      idWrap.className = "id";
-      idWrap.textContent = "id";
-      var idIn = document.createElement("input");
-      idIn.value = r.id;
-      idIn.spellcheck = false;
-      idIn.oninput = function () { r.id = idIn.value; r.autoId = false; render(); };
-      idIn.onblur = function () { r.id = slug(idIn.value) || r.id; idIn.value = r.id; render(); };
-      idWrap.appendChild(idIn);
+      var ta = document.createElement("textarea");
+      ta.rows = 2;
+      ta.value = r.description;
+      ta.placeholder = "What a good pull request does, in plain language";
+      ta.setAttribute("aria-label", "Rule " + (i + 1) + " description");
+      ta.oninput = function () {
+        if (r.autoId) { r.id = slug(ta.value).split("-").slice(0, 4).join("-"); idIn.value = r.id; }
+        r.description = ta.value; render();
+      };
 
-      li.appendChild(ta); li.appendChild(mini); li.appendChild(del); li.appendChild(idWrap);
+      top.appendChild(idWrap); top.appendChild(mini); top.appendChild(del);
+      li.appendChild(top); li.appendChild(ta);
       rulesEl.appendChild(li);
     });
   }
